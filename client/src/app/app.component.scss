@@ -92,6 +92,40 @@ svg#clouds {
         border-bottom: 2px grey solid;
         height: 50%;
         width: 100%;
+        padding: 60px;
+        box-sizing: border-box;
+        background: #fafafa;
     }
 
+    .user-data-container {
+        border: 1px black solid;
+        margin-bottom: 50px;
+        display: flex;
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .form-field-container {
+        position: relative;
+    }
+
+    .extension {
+        position: absolute;
+        top: 23px;
+        left: 101%;
+    }
+
+    .player-id,
+    .balance {
+        font-weight: bold;
+    }
+
+    .form-wrapper {
+        width: 400px;
+    }
+
+    #bid-form {
+        display: flex;
+        flex-direction: column;
+    }
 }

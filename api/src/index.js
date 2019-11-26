@@ -10,8 +10,12 @@ process
 
 const express = require('express');
 const app = express();
+const server = require('http').Server(app);
 const bodyParser = require('body-parser');
-const connectDb = require('./db/connect');
+
+const io = require('socket.io')(server);
+require('./socket/launch')(io);
+
 
 // always set middleware before routes
 
@@ -27,10 +31,9 @@ app.use(bodyParser.urlencoded({
 
 app.get('/api/test', (req, res, next) => {
     console.log('Test endpoint hit.');
-    return res.status(200).json({});
+    return res.status(200).json('Test endpoint hit.');
 });
 
-connectDb();
-app.listen(process.env.PORT, () =>
+server.listen(process.env.PORT, () =>
     console.log(`Example app listening on port ${process.env.PORT}!`)
 );

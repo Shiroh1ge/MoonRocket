@@ -55,5 +55,20 @@ h2 {
     color: green;
 }
 
+.mat-form-field {
+    color: #202020;
+    width: 100%;
+    border-color: red !important;
+}
+
+.mat-form-field-appearance-outline
+.mat-form-field-outline {
+    color: #919191;
+}
+
+mat-label {
+    color: #919191;
+}
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

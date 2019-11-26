@@ -24,8 +24,42 @@
         </div>
     </div>
     <div class="right">
-        <div class="top"></div>
-        <div class="bottom"></div>
+        <div class="top">
+            <div class="form-wrapper">
+                <div class="user-data-container">
+                    <span>Current Player: <span class="player-id">{{player.id}}</span></span>
+                    <span>Balance: <span class="balance">{{player?.movement?.amount}}</span></span>
+                </div>
+                <form id="bid-form">
+                    <div class="valign-center form-field-container">
+                        <mat-form-field appearance="outline" class="mat-form-field" color="primary">
+                            <mat-label translate>Bid Amount</mat-label>
+
+                            <input matInput type="number" />
+                        </mat-form-field>
+                        <span class="extension">coins</span>
+                    </div>
+
+                    <div class="valign-center form-field-container">
+                        <mat-form-field appearance="outline" class="mat-form-field">
+                            <mat-label translate>Altitude</mat-label>
+
+                            <input matInput type="number" />
+                        </mat-form-field>
+                        <span class="extension">km</span>
+                    </div>
+
+                    <button mat-flat-button color="primary" [disabled]="form.invalid">Bid</button>
+                </form>
+            </div>
+
+
+        </div>
+        <div class="bottom">
+            <div class="launch-container">
+                <h2>Current launch</h2>
+            </div>
+        </div>
     </div>
 </div>
 
