@@ -1,0 +1,26 @@
+@import 'variables';
+
+$progress-bg-color: #E5E5E5;
+
+.progress {
+    background-color: $progress-bg-color;
+    border-radius: 3px;
+    box-shadow: none;
+    height: 100%;
+    width: 4px;
+    flex-direction: column;
+    display: flex;
+    justify-content: flex-end;
+
+    .progress-bar {
+        height: 4px;
+        background-color: $primary;
+        border-radius: 3px;
+        transition: all 1s;
+    }
+}
+
+.completeness-text {
+    margin-top: 10px;
+    font-size: 14px;
+}

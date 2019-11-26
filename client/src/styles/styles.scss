@@ -1,0 +1,59 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'css-reset';
+@import 'variables';
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.valign-center {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.center {
+    justify-content: center;
+    text-align: center;
+}
+
+.page-flex-wrapper {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.page-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0px !important;
+}
+
+h2 {
+    font-size: 36px;
+}
+
+.field-error {
+    color: red;
+}
+
+.field-success {
+    color: green;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

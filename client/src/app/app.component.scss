@@ -1,0 +1,97 @@
+@import 'variables';
+
+svg#clouds {
+    position: fixed;
+    bottom: -160px;
+    left: -230px;
+    z-index: -10;
+    width: 1920px;
+}
+
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+.left {
+    display: flex;
+    position: relative;
+    flex-basis: 40%;
+    border-right: 2px grey solid;
+
+    .moon-container {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+
+        #moon {
+            width: 200px;
+        }
+    }
+
+    .rocket-wrapper {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        flex: 1;
+        width: 100%;
+        bottom: 0;
+    }
+
+    .rocket-container {
+        width: 164px;
+        height: 296px;
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    #rocket-body {
+        top: 0;
+        right: 0;
+        display: block;
+        position: absolute;
+    }
+
+    #rocket-flame {
+        bottom: 10px;
+        left: 50%;
+        margin-left: -34px;
+        display: block;
+        position: absolute;
+    }
+
+    .progress-wrapper {
+        display: flex;
+        margin-left: auto;
+        align-items: center;
+        margin-right: 140px;
+        position: relative;
+    }
+
+    .progress-container {
+        height: 80%;
+        position: absolute;
+        width: 200px;
+    }
+}
+
+
+
+
+.right {
+    flex: 1;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+
+    .top {
+        border-bottom: 2px grey solid;
+        height: 50%;
+        width: 100%;
+    }
+
+}

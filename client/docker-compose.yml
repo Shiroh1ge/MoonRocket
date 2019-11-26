@@ -1,0 +1,15 @@
+version: '3.5' # We use version 3.5 syntax
+services: # Here we define our service(s)
+  client: # The name of the service
+    build: . # Location of our Dockerfile
+    volumes: # Volume binding
+      - .:/usr/src/app
+    ports:
+      - 4200:4200 # Port mapping
+    command: npm run start
+    networks:
+      - server
+
+networks:
+  server:
+    external: true
