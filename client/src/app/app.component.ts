@@ -24,6 +24,14 @@ export class AppComponent implements OnInit {
                 private playersSelectors: PlayerSelectors) {
     }
 
+    public submitForm(values) {
+        console.log(values);
+        const data = {};
+
+        this.socketService.emit(SocketEvents.bid, data);
+
+    }
+
     ngOnInit() {
         this.socketService.on(SocketEvents.connected)
             .subscribe((socketData: { id: string }) => {

@@ -49,7 +49,11 @@
                         <span class="extension">km</span>
                     </div>
 
-                    <button mat-flat-button color="primary" [disabled]="form.invalid">Bid</button>
+                    <button mat-flat-button
+                            class="submit-button"
+                            color="primary"
+                            [disabled]="amount?.value === 0 || altitude?.value === 0"
+                            (click)="submitForm(form.value)">Bid</button>
                 </form>
             </div>
 

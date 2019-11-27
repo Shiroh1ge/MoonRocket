@@ -1,4 +1,3 @@
-process.env.PORT = 3000;
 process
     .on('unhandledRejection', (reason, p) => {
         console.error(reason, 'Unhandled Rejection at Promise', p);
@@ -8,16 +7,16 @@ process
         process.exit(1);
     });
 
+const port = process.env.PORT || 3000;
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const bodyParser = require('body-parser');
+const connectDb = require('./src/models/index').connectDb;
 
 const io = require('socket.io')(server);
-require('./socket/launch')(io);
+require('./src/socket/launch')(io);
 
-
-// always set middleware before routes
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -29,11 +28,8 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.get('/api/test', (req, res, next) => {
-    console.log('Test endpoint hit.');
-    return res.status(200).json('Test endpoint hit.');
-});
-
-server.listen(process.env.PORT, () =>
-    console.log(`Example app listening on port ${process.env.PORT}!`)
-);
+connectDb().then(() => {
+        server.listen(port, () =>
+            console.log(`Example app listening on port ${port}!`)
+        );
+    });

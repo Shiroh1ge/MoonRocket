@@ -113,6 +113,7 @@ svg#clouds {
         position: absolute;
         top: 23px;
         left: 101%;
+        color: grey;
     }
 
     .player-id,
@@ -127,5 +128,9 @@ svg#clouds {
     #bid-form {
         display: flex;
         flex-direction: column;
+    }
+
+    .submit-button {
+
     }
 }
