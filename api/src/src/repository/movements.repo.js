@@ -1,4 +1,3 @@
-const Player = require('../models').Player;
 const Movement = require('../models').Movement;
 
 /**
@@ -8,8 +7,8 @@ const Movement = require('../models').Movement;
  * @param {object} [options]
  * @returns {Promise.<*>}
  */
-const getPlayer = async (query, fields = {}, options = {}) => {
-    return await Player.findOne({where: query, include: [Movement]});
+const getMovement = async (query, fields = {}, options = {}) => {
+    return await Movement.findOne({where: query});
 };
 
 /**
@@ -17,8 +16,8 @@ const getPlayer = async (query, fields = {}, options = {}) => {
  * @param {object} query
  * @returns {Promise.<*>}
  */
-const findOrCreatePlayer = async (query) => {
-    const player = await Player.findOrCreate({where: query, include: [Movement]});
+const findOrCreateMovement = async (query) => {
+    const player = await Movement.findOrCreate({where: query});
 
     return player;
 };
@@ -28,15 +27,15 @@ const findOrCreatePlayer = async (query) => {
  * @param {object} playerData
  * @returns {Promise.<*>}
  */
-const createPlayer = async (playerData) => {
-    const player = await Player.create(playerData);
+const createMovement = async (playerData) => {
+    const player = await Movement.create(playerData);
 
     return player;
 };
 
 
 module.exports = {
-    getPlayer,
-    createPlayer,
-    findOrCreatePlayer
+    getMovement,
+    createMovement,
+    findOrCreateMovement
 };

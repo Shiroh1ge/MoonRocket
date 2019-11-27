@@ -25,8 +25,9 @@ export class AppComponent implements OnInit {
     }
 
     public submitForm(values) {
-        console.log(values);
-        const data = {};
+        const data = {
+
+        };
 
         this.socketService.emit(SocketEvents.bid, data);
 
@@ -35,7 +36,6 @@ export class AppComponent implements OnInit {
     ngOnInit() {
         this.socketService.on(SocketEvents.connected)
             .subscribe((socketData: { id: string }) => {
-
                 this.playerActions.updatePlayerDispatch({ id: socketData.id });
             });
 

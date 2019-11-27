@@ -8,6 +8,7 @@ process
     });
 
 const port = process.env.PORT || 3000;
+const masterRouter = require('./src/routes/index');
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
@@ -28,8 +29,10 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
+app.use('/api', masterRouter);
+
 connectDb().then(() => {
-        server.listen(port, () =>
-            console.log(`Example app listening on port ${port}!`)
-        );
-    });
+    server.listen(port, () =>
+        console.log(`Example app listening on port ${port}!`)
+    );
+});

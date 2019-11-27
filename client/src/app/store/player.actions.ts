@@ -3,9 +3,9 @@ import { createAction, props, Store } from '@ngrx/store';
 import { Player } from '../models/player.model';
 import { GlobalState } from '../store';
 
-const setPlayer = createAction(
-    'SET_PLAYER',
-    props<{ payload: Player }>()
+const getPlayer = createAction(
+    'GET_PLAYER',
+    props<{ payload: {userId: string} }>()
 );
 
 const updatePlayer = createAction(
@@ -16,15 +16,15 @@ const updatePlayer = createAction(
 
 @Injectable({ providedIn: 'root' })
 export class PlayerActions {
-    public static setPlayer = setPlayer;
+    public static getPlayer = getPlayer;
     public static updatePlayer = updatePlayer;
 
     constructor(private store: Store<GlobalState>) {
 
     }
 
-    public setPlayerDispatch(userData: Player) {
-        return this.store.dispatch(PlayerActions.setPlayer({ payload: userData }));
+    public getPlayerDispatch(playerData: {userId: string}) {
+        return this.store.dispatch(PlayerActions.getPlayer({ payload: playerData }));
     }
 
     public updatePlayerDispatch(userData: Partial<Player>) {

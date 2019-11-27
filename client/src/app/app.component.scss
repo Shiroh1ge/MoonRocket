@@ -131,6 +131,9 @@ svg#clouds {
     }
 
     .submit-button {
-
+        &:disabled {
+            background: #cccccc;
+            color: #959595;
+        }
     }
 }

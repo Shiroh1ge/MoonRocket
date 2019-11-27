@@ -13,7 +13,7 @@ export const playerInitialState: PlayerState = {
 
 const reducer = createReducer(
     playerInitialState,
-    on(PlayerActions.setPlayer, (state, { payload }): PlayerState => ({
+    on(PlayerActions.getPlayer, (state, { payload }): PlayerState => ({
         ...state,
         player: payload
     })),
