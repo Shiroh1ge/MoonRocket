@@ -12,11 +12,13 @@ import { PlayerSelectors } from './store/player.selectors';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+    private maximumAltitude: number = 1000;
     public startingValue: number = 1;
     public player: Player;
-    public amount = new FormControl(0, { validators: [Validators.required] });
-    public altitude = new FormControl(0, { validators: [Validators.required] });
+    public amount = new FormControl(null, { validators: [Validators.required] });
+    public altitude = new FormControl(null, { validators: [Validators.required] });
     public form: FormGroup;
+
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -26,7 +28,10 @@ export class AppComponent implements OnInit {
 
     public submitForm(values) {
         const data = {
-
+            altitude: values.altitude,
+            amount: values.amount,
+            userId: this.player.userId,
+            playerId: this.player.id
         };
 
         this.socketService.emit(SocketEvents.bid, data);
@@ -36,7 +41,11 @@ export class AppComponent implements OnInit {
     ngOnInit() {
         this.socketService.on(SocketEvents.connected)
             .subscribe((socketData: { id: string }) => {
-                this.playerActions.updatePlayerDispatch({ id: socketData.id });
+                this.socketService.emit(SocketEvents.getPlayer, { userId: socketData.id });
+            });
+        this.socketService.on(SocketEvents.getPlayer)
+            .subscribe((player: Player) => {
+                this.playerActions.getPlayerSuccessDispatch(player);
             });
 
         this.playersSelectors.player$
@@ -47,6 +56,18 @@ export class AppComponent implements OnInit {
         this.form = this.formBuilder.group({
             altitude: this.altitude,
             amount: this.amount
+        });
+
+        this.amount.valueChanges.subscribe(value => {
+            if (value > this.player.Movement.amount) {
+                this.amount.patchValue(this.player.Movement.amount);
+            }
+        });
+
+        this.altitude.valueChanges.subscribe(value => {
+            if (value > this.maximumAltitude) {
+                this.altitude.patchValue(this.maximumAltitude);
+            }
         });
     }
 }

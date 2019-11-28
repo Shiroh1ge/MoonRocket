@@ -16,7 +16,8 @@ const bodyParser = require('body-parser');
 const connectDb = require('./src/models/index').connectDb;
 
 const io = require('socket.io')(server);
-require('./src/socket/launch')(io);
+require('./src/socket/launches')(io);
+require('./src/socket/players')(io);
 
 
 app.use(function (req, res, next) {

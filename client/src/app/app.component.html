@@ -28,14 +28,14 @@
             <div class="form-wrapper">
                 <div class="user-data-container">
                     <span>Current Player: <span class="player-id">{{player.id}}</span></span>
-                    <span>Balance: <span class="balance">{{player?.movement?.amount}}</span></span>
+                    <span>Balance: <span class="balance">{{player?.Movement?.amount}}</span></span>
                 </div>
-                <form id="bid-form">
+                <form id="bid-form" [formGroup]="form">
                     <div class="valign-center form-field-container">
                         <mat-form-field appearance="outline" class="mat-form-field" color="primary">
                             <mat-label translate>Bid Amount</mat-label>
 
-                            <input matInput type="number" />
+                            <input matInput formControlName="amount" type="number"/>
                         </mat-form-field>
                         <span class="extension">coins</span>
                     </div>
@@ -44,7 +44,7 @@
                         <mat-form-field appearance="outline" class="mat-form-field">
                             <mat-label translate>Altitude</mat-label>
 
-                            <input matInput type="number" />
+                            <input matInput formControlName="altitude" type="number"/>
                         </mat-form-field>
                         <span class="extension">km</span>
                     </div>
@@ -52,8 +52,9 @@
                     <button mat-flat-button
                             class="submit-button"
                             color="primary"
-                            [disabled]="form.controls.amount?.value === 0 || form.controls.altitude?.value === 0"
-                            (click)="submitForm(form.value)">Bid</button>
+                            [disabled]="!form.controls.amount?.value || !form.controls.altitude?.value"
+                            (click)="submitForm(form.value)">Bid
+                    </button>
                 </form>
             </div>
 

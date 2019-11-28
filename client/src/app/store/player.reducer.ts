@@ -1,6 +1,6 @@
 import { Action, createReducer, createSelector, on } from '@ngrx/store';
 import { Player } from '../models/player.model';
-import { GlobalState } from '../store';
+import { GlobalState } from './store';
 import { PlayerActions } from './player.actions';
 
 export interface PlayerState {
@@ -13,7 +13,7 @@ export const playerInitialState: PlayerState = {
 
 const reducer = createReducer(
     playerInitialState,
-    on(PlayerActions.getPlayer, (state, { payload }): PlayerState => ({
+    on(PlayerActions.getPlayerSuccess, (state, { payload }): PlayerState => ({
         ...state,
         player: payload
     })),

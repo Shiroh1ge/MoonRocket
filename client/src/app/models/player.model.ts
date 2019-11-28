@@ -2,5 +2,6 @@ import { Movement } from './movement.model';
 
 export interface Player {
     id: string;
-    movement: Movement;
+    Movement: Movement;
+    userId: string;
 }

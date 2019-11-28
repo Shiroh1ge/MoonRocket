@@ -12,25 +12,25 @@ const getMovement = async (query, fields = {}, options = {}) => {
 };
 
 /**
- * Creates a player if it does not exist.
+ * Creates a movement if it does not exist.
  * @param {object} query
  * @returns {Promise.<*>}
  */
 const findOrCreateMovement = async (query) => {
-    const player = await Movement.findOrCreate({where: query});
+    const movement = await Movement.findOrCreate({where: query});
 
-    return player;
+    return movement;
 };
 
 /**
- * Creates a player and saves it in the database.
- * @param {object} playerData
+ * Creates a movement and saves it in the database.
+ * @param {object} movementData
  * @returns {Promise.<*>}
  */
-const createMovement = async (playerData) => {
-    const player = await Movement.create(playerData);
+const createMovement = async (movementData) => {
+    const movement = await Movement.create(movementData);
 
-    return player;
+    return movement;
 };
 
 
