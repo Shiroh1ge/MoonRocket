@@ -52,6 +52,7 @@ export class SocketService {
      * Disconnects the current socket connection.
      */
     public disconnect() {
+        this.socket.off('connected');
         this.socket.off('connect');
         this.socket.off('disconnect');
         this.socket.disconnect(true);

@@ -5,10 +5,11 @@ const MovementsRepo = require('../repository/movements.repo');
 /**
  * Used to find a player in the database.
  * @param {object} query
+ * @param {object} options
  * @returns {Promise.<*>}
  */
-const getPlayer = async (query) => {
-    return await Player.findOne({where: query, include: [Movement]});
+const getPlayer = async (query, options = {}) => {
+    return await Player.findOne({where: query, include: [Movement], ...options});
 };
 
 /**
