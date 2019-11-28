@@ -1,5 +1,5 @@
 module.exports = function (sequelize, DataTypes) {
-    const Player = sequelize.define('Player',
+    const Launch = sequelize.define('Launch',
         {
             id: {type: DataTypes.INTEGER,
                 autoIncrement: true,
@@ -7,16 +7,17 @@ module.exports = function (sequelize, DataTypes) {
                 unique: true,
                 allowNull: false},
             userId: {type: DataTypes.STRING},
-            balance: {type: DataTypes.INTEGER, defaultValue: 10},
+            altitude: {type: DataTypes.INTEGER, defaultValue: 0},
+            totalBidAmount: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false}
         },
         {
             freezeTableName: true
         }
     );
 
-    Player.associate = models => {
-        Player.hasMany(models.Movement, {foreignKey: 'playerId'});
+    Launch.associate = models => {
+        Launch.hasMany(models.Movement, {foreignKey: 'launchId'});
     };
 
-    return Player;
+    return Launch;
 };

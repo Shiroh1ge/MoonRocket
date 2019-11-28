@@ -1,4 +1,5 @@
 const Movement = require('../models').Movement;
+const Player = require('../models').Player;
 
 /**
  * Used to find a user in the database.
@@ -8,18 +9,7 @@ const Movement = require('../models').Movement;
  * @returns {Promise.<*>}
  */
 const getMovement = async (query, fields = {}, options = {}) => {
-    return await Movement.findOne({where: query});
-};
-
-/**
- * Creates a movement if it does not exist.
- * @param {object} query
- * @returns {Promise.<*>}
- */
-const findOrCreateMovement = async (query) => {
-    const movement = await Movement.findOrCreate({where: query});
-
-    return movement;
+    return await Movement.findOne({where: query, include: [Player]});
 };
 
 /**
@@ -36,6 +26,5 @@ const createMovement = async (movementData) => {
 
 module.exports = {
     getMovement,
-    createMovement,
-    findOrCreateMovement
+    createMovement
 };

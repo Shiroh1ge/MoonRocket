@@ -1,6 +1,4 @@
 const Player = require('../models').Player;
-const Movement = require('../models').Movement;
-const MovementsRepo = require('../repository/movements.repo');
 
 /**
  * Used to find a player in the database.
@@ -9,7 +7,7 @@ const MovementsRepo = require('../repository/movements.repo');
  * @returns {Promise.<*>}
  */
 const getPlayer = async (query, options = {}) => {
-    return await Player.findOne({where: query, include: [Movement], ...options});
+    return await Player.findOne({where: query, ...options});
 };
 
 /**
@@ -18,7 +16,7 @@ const getPlayer = async (query, options = {}) => {
  * @returns {Promise.<*>}
  */
 const findOrCreatePlayer = async (query) => {
-    const [player, created] = await Player.findOrCreate({where: query, include: [Movement]});
+    const [player, created] = await Player.findOrCreate({where: query});
 
     return player;
 };
@@ -36,11 +34,8 @@ const updatePlayer = async (query, updateData) => {
 const createPlayer = async (playerData) => {
     try {
         const player = await Player.create(playerData);
-        const movement = await MovementsRepo.createMovement({playerId: player.id});
-        await updatePlayer({id: player.id}, {movementId: movement.id});
-        const updatedPlayer = await getPlayer({id: player.id});
 
-        return updatedPlayer;
+        return player;
 
     } catch (error) {
         console.error('Error creating player: ', error);
