@@ -1,7 +1,7 @@
 const playersRepo = require('../repository/players.repo');
 const SocketEvents = require('../constants/socket-events').SocketEvents;
 const Rx = require('rxjs');
-const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay} = require('rxjs/operators');
+const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
 
 const LAUNCH_CREATION_INTERVAL = 1 * 1000;
 const stop$ = new Rx.Subject();
@@ -34,7 +34,7 @@ module.exports = (io) => {
         socket.on(SocketEvents.bid, async (data) => {
             // currently we substitute userId with the socket id
             const player = await playersRepo.getPlayer({userId: data.userId});
-            const amount = getValidatedAmount(data.amount, player.Movement.amount);
+            const amount = getValidatedAmount(data.amount, player.balance);
 
             const playerBiddingData = {
                 userId: data.userId,
@@ -56,23 +56,24 @@ module.exports = (io) => {
             takeUntil(stop$),
             repeatWhen(() => restart$)
         )
-        .subscribe(map => {
-                console.log('map', map);
+        .subscribe(playersBufferMap => {
+                console.log('map', playersBufferMap);
                 if (joinedPlayersBuffer.size > 0) {
                     // init stuff
                     betsFrozen = true;
                     joinedPlayersBuffer.clear();
                     stop$.next();
 
-                    // We use this to pause before creating a new launch,
-                    const timeInterval$ = Rx.interval(1000);
-                    const timer$ = Rx.timer(5000);
-                    const example = timeInterval$.pipe(
-                        delay(2000),
-                        takeUntil(timer$)
-                    );
-                    example.subscribe(val => {
-                            console.log('inside timer', val);
+                    // How many seconds to wait before starting a new launch
+                    const countdownSeconds = 5;
+                    const timer$ = Rx.timer(2000, 1000)
+                        .pipe(
+                            map(value => countdownSeconds - value),
+                            take(countdownSeconds)
+                        );
+
+                    timer$.subscribe(val => {
+                            io.emit(SocketEvents.newLaunchCountdown)
                         },
                         {},
                         complete => {

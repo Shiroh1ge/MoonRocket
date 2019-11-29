@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
     public amount = new FormControl(null, { validators: [Validators.required] });
     public altitude = new FormControl(null, { validators: [Validators.required] });
     public form: FormGroup;
-
+    public newLaunchCountdown: number;
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -59,8 +59,8 @@ export class AppComponent implements OnInit {
         });
 
         this.amount.valueChanges.subscribe(value => {
-            if (value > this.player.Movement.amount) {
-                this.amount.patchValue(this.player.Movement.amount);
+            if (value > this.player.balance) {
+                this.amount.patchValue(this.player.balance);
             }
         });
 

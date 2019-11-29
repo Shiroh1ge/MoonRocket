@@ -27,6 +27,7 @@ const updateLaunch = async (query, updateData) => {
 /**
  * Creates a launch and saves it in the database.
  * @param {object} launchData
+ * @param {string} launchData.playerId
  * @param {string} launchData.userId
  * @returns {Promise.<*>}
  */

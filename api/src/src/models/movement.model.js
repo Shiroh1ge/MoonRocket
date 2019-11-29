@@ -8,7 +8,8 @@ module.exports = function (sequelize, DataTypes) {
                 unique: true,
                 allowNull: false
             },
-            amount: {
+            // how many coins the user has won/lost
+            gain: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
                 defaultValue: 0
