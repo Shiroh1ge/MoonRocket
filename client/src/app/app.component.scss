@@ -125,7 +125,7 @@ svg#clouds {
         width: 400px;
     }
 
-    #bid-form {
+    #bet-form {
         display: flex;
         flex-direction: column;
     }
@@ -135,5 +135,14 @@ svg#clouds {
             background: #cccccc;
             color: #959595;
         }
+    }
+
+
+    .bottom {
+
+    }
+
+    .launch-container {
+        padding: 20px 60px;
     }
 }

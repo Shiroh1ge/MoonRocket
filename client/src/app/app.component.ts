@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
     public amount = new FormControl(null, { validators: [Validators.required] });
     public altitude = new FormControl(null, { validators: [Validators.required] });
     public form: FormGroup;
-    public newLaunchCountdown: number;
+    public newLaunchCountdownSeconds: number;
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
             playerId: this.player.id
         };
 
-        this.socketService.emit(SocketEvents.bid, data);
+        this.socketService.emit(SocketEvents.bet, data);
 
     }
 
@@ -46,6 +46,10 @@ export class AppComponent implements OnInit {
         this.socketService.on(SocketEvents.getPlayer)
             .subscribe((player: Player) => {
                 this.playerActions.getPlayerSuccessDispatch(player);
+            });
+        this.socketService.on(SocketEvents.newLaunchCountdown)
+            .subscribe((countDownSeconds) => {
+                this.newLaunchCountdownSeconds = countDownSeconds;
             });
 
         this.playersSelectors.player$

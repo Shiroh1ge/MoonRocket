@@ -30,10 +30,10 @@
                     <span>Current Player: <span class="player-id">{{player.id}}</span></span>
                     <span>Balance: <span class="balance">{{player?.balance}}</span></span>
                 </div>
-                <form id="bid-form" [formGroup]="form">
+                <form id="bet-form" [formGroup]="form">
                     <div class="valign-center form-field-container">
                         <mat-form-field appearance="outline" class="mat-form-field" color="primary">
-                            <mat-label translate>Bid Amount</mat-label>
+                            <mat-label translate>Bet Amount</mat-label>
 
                             <input matInput formControlName="amount" type="number"/>
                         </mat-form-field>
@@ -53,7 +53,7 @@
                             class="submit-button"
                             color="primary"
                             [disabled]="!form.controls.amount?.value || !form.controls.altitude?.value"
-                            (click)="submitForm(form.value)">Bid
+                            (click)="submitForm(form.value)">Bet
                     </button>
                 </form>
             </div>
@@ -63,6 +63,12 @@
         <div class="bottom">
             <div class="launch-container">
                 <h2>Current launch</h2>
+
+                <div class="launch-countdown">
+                    <p>
+                       New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
+                    </p>
+                </div>
             </div>
         </div>
     </div>

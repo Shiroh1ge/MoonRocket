@@ -2,7 +2,7 @@ export const SocketEvents = {
     connected: 'connected',
     joinRoom: 'rooms.join',
     leaveRoom: 'rooms.leave',
-    bid: 'launches.bid',
+    bet: 'launches.bet',
     newLaunchCountdown: 'launches.newLaunchCountdown',
     getPlayer: 'players.getPlayer'
 };

@@ -8,7 +8,10 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: false},
             userId: {type: DataTypes.STRING},
             altitude: {type: DataTypes.INTEGER, defaultValue: 0},
-            totalBidAmount: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false}
+            participantsCount: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false},
+            totalBetAmount: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false},
+            totalLost: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false},
+            totalWon: {type: DataTypes.INTEGER, defaultValue: 0, allowNull: false},
         },
         {
             freezeTableName: true

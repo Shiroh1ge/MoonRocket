@@ -1,79 +1,87 @@
+const launchesRepo = require('../repository/launches.repo');
 const playersRepo = require('../repository/players.repo');
 const SocketEvents = require('../constants/socket-events').SocketEvents;
 const Rx = require('rxjs');
 const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
 
-const LAUNCH_CREATION_INTERVAL = 1 * 1000;
+const LAUNCH_CREATION_INTERVAL = 2 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
-const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
-    .pipe(
-        map(int => joinedPlayersBuffer)
-    );
+
 const joinedPlayersBuffer = new Map();
 
 let betsFrozen = false;
 
 /**
- * Checks if bid amount is higher than player balance, if it's higher, returns the maximum player balance.
- * @param bidAmount
+ * Checks if bet amount is higher than player balance, if it's higher, returns the maximum player balance.
+ * @param betAmount
  * @param playerBalance
  */
-const getValidatedAmount = (bidAmount, playerBalance) => {
-    console.log('bd am', bidAmount);
+const getValidatedAmount = (betAmount, playerBalance) => {
+    console.log('bd am', betAmount);
     console.log('baklans', playerBalance);
-    if (bidAmount > playerBalance) {
+    if (betAmount > playerBalance) {
         return playerBalance;
     } else {
-        return bidAmount;
+        return betAmount;
     }
+};
+
+const initLaunchCreation = async () => {
+    betsFrozen = true;
+    stop$.next();
+    console.log('init launch', joinedPlayersBuffer);
+    const launch = await launchesRepo.createLaunch({
+
+    })
+
+    joinedPlayersBuffer.clear();
 };
 
 module.exports = (io) => {
     io.on('connection', async (socket) => {
-        socket.on(SocketEvents.bid, async (data) => {
+        socket.on(SocketEvents.bet, async (data) => {
             // currently we substitute userId with the socket id
-            const player = await playersRepo.getPlayer({userId: data.userId});
+            const player = await playersRepo.getPlayer({id: data.playerId});
             const amount = getValidatedAmount(data.amount, player.balance);
 
-            const playerBiddingData = {
+            const playerBetData = {
+                playerId: player.id,
                 userId: data.userId,
                 amount,
                 altitude: data.altitude
             };
 
-            if (!betsFrozen) {
-                joinedPlayersBuffer.set(playerBiddingData.userId, playerBiddingData);
-                const joinedPlayers = [...joinedPlayersBuffer.values()];
-                // console.log(joinedPlayers);
-            }
+            joinedPlayersBuffer.set(playerBetData.userId, playerBetData);
 
         });
     });
 
-    launchCreationInterval$
+    const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
         .pipe(
+            map(int => joinedPlayersBuffer),
             takeUntil(stop$),
             repeatWhen(() => restart$)
         )
-        .subscribe(playersBufferMap => {
+        .subscribe(async (playersBufferMap) => {
                 console.log('map', playersBufferMap);
                 if (joinedPlayersBuffer.size > 0) {
                     // init stuff
-                    betsFrozen = true;
-                    joinedPlayersBuffer.clear();
-                    stop$.next();
+                    await initLaunchCreation();
 
-                    // How many seconds to wait before starting a new launch
+                    // Delay before starting the next launch countdown (show the animation here)
+                    const nextLaunchDelay = 2000;
+                    // Countdown before starting the new launch (after animation ending)
                     const countdownSeconds = 5;
-                    const timer$ = Rx.timer(2000, 1000)
+                    const timer$ = Rx.timer(nextLaunchDelay, 1000)
                         .pipe(
                             map(value => countdownSeconds - value),
                             take(countdownSeconds)
                         );
 
                     timer$.subscribe(val => {
-                            io.emit(SocketEvents.newLaunchCountdown)
+                            console.log('countdown before next launch: ', val);
+                            io.emit(SocketEvents.newLaunchCountdown, val);
                         },
                         {},
                         complete => {
