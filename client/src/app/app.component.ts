@@ -72,6 +72,10 @@ export class AppComponent implements OnInit {
             if (value > this.maximumAltitude) {
                 this.altitude.patchValue(this.maximumAltitude);
             }
+
+            if (value === 0) {
+                this.altitude.patchValue(1);
+            }
         });
     }
 }

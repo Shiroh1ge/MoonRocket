@@ -4,11 +4,11 @@ const SocketEvents = require('../constants/socket-events').SocketEvents;
 const Rx = require('rxjs');
 const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
 
-const LAUNCH_CREATION_INTERVAL = 2 * 1000;
+const LAUNCH_CREATION_INTERVAL = 5 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
 
-const joinedPlayersBuffer = new Map();
+const playerBetsBuffer = new Map();
 
 let betsFrozen = false;
 
@@ -18,8 +18,6 @@ let betsFrozen = false;
  * @param playerBalance
  */
 const getValidatedAmount = (betAmount, playerBalance) => {
-    console.log('bd am', betAmount);
-    console.log('baklans', playerBalance);
     if (betAmount > playerBalance) {
         return playerBalance;
     } else {
@@ -28,14 +26,21 @@ const getValidatedAmount = (betAmount, playerBalance) => {
 };
 
 const initLaunchCreation = async () => {
-    betsFrozen = true;
-    stop$.next();
-    console.log('init launch', joinedPlayersBuffer);
-    const launch = await launchesRepo.createLaunch({
+    try {
+        betsFrozen = true;
+        stop$.next();
 
-    })
+        const playerBets = [...playerBetsBuffer.values()];
+        playerBetsBuffer.clear();
 
-    joinedPlayersBuffer.clear();
+        const launch = await launchesRepo.newLaunchFlow(playerBets);
+
+    } catch (error) {
+        console.error('Error initiating launch: ', error);
+        // We should clear all bets and refund users if there is an error
+        playerBetsBuffer.clear();
+    }
+
 };
 
 module.exports = (io) => {
@@ -52,20 +57,19 @@ module.exports = (io) => {
                 altitude: data.altitude
             };
 
-            joinedPlayersBuffer.set(playerBetData.userId, playerBetData);
-
+            playerBetsBuffer.set(playerBetData.userId, playerBetData);
         });
     });
 
     const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
         .pipe(
-            map(int => joinedPlayersBuffer),
+            map(int => playerBetsBuffer),
             takeUntil(stop$),
             repeatWhen(() => restart$)
         )
         .subscribe(async (playersBufferMap) => {
-                console.log('map', playersBufferMap);
-                if (joinedPlayersBuffer.size > 0) {
+                console.log('playerBetsBufferMap', playersBufferMap);
+                if (playerBetsBuffer.size > 0) {
                     // init stuff
                     await initLaunchCreation();
 
@@ -83,9 +87,11 @@ module.exports = (io) => {
                             console.log('countdown before next launch: ', val);
                             io.emit(SocketEvents.newLaunchCountdown, val);
                         },
-                        {},
+                        error => {
+                            console.log('error in launch', error);
+                        },
                         complete => {
-                            console.log('after complete timer, val', complete);
+                            console.log('Launch has completed, restarting...');
                             betsFrozen = false;
                             restart$.next();
                         }
