@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { SocketEvents } from '../constants/socket-events';
+import { SocketEvents, SocketRooms } from '../constants/socket-events';
 import { SocketService } from './core/services/socket.service';
+import { Launch } from './models/launch.model';
 import { Player } from './models/player.model';
 import { PlayerActions } from './store/player.actions';
 import { PlayerSelectors } from './store/player.selectors';
@@ -26,6 +27,9 @@ export class AppComponent implements OnInit {
     public altitude = new FormControl(null, { validators: [Validators.required] });
     public form: FormGroup;
     public newLaunchCountdownSeconds: number;
+    public playerBets: PlayerBet[] = [];
+    public displayedColumns = ['userId', 'amount', 'altitude', 'isWinner'];
+    public launch: Launch;
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -48,15 +52,21 @@ export class AppComponent implements OnInit {
     ngOnInit() {
         this.socketService.on(SocketEvents.connected)
             .subscribe((socketData: { id: string }) => {
+                console.log('socket ID', socketData);
                 this.socketService.emit(SocketEvents.getPlayer, { userId: socketData.id });
+
+                setTimeout(() => {
+                    this.socketService.joinRoom(SocketRooms.user + socketData.id);
+                }, 250);
             });
         this.socketService.on(SocketEvents.getPlayer)
             .subscribe((player: Player) => {
                 this.playerActions.getPlayerSuccessDispatch(player);
             });
         this.socketService.on(SocketEvents.newLaunch)
-            .subscribe((countDownSeconds) => {
-                this.newLaunchCountdownSeconds = countDownSeconds;
+            .subscribe((data: { launch: Launch, playerBets: PlayerBet[] }) => {
+                this.playerBets = data.playerBets;
+                this.launch = data.launch;
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

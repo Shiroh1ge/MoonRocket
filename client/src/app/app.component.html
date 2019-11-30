@@ -66,9 +66,60 @@
 
                 <div class="launch-countdown">
                     <p>
-                       New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
+                        New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
                     </p>
                 </div>
+            </div>
+
+            <div class="table-container">
+                <table mat-table [dataSource]="playerBets"
+                       style="width: 100%"
+                       matSortDisableClear
+                       matSort
+                       class="mat-table"
+                       matSortActive="createdAt" matSortDirection="desc">
+
+                    <ng-container matColumnDef="userId">
+                        <th mat-header-cell mat-sort-header *matHeaderCellDef>User</th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.userId }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell mat-sort-header *matHeaderCellDef>Bet Amount</th>
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.amount }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="altitude">
+                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                            Bet Altitude
+                        </th>
+
+                        <td mat-cell *matCellDef="let element">
+                            {{ element.altitude }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="isWinner">
+                        <th mat-header-cell mat-sort-header *matHeaderCellDef>
+                            Result
+                        </th>
+
+                        <td mat-cell *matCellDef="let element">
+                            <span [ngClass]="{
+                                'winner': element.isWinner,
+                                'loser': !element.isWinner
+                            }">{{ element.isWinner ? 'WINNER' : 'LOSER' }}</span>
+
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr class="mat-row" mat-row *matRowDef="let element; columns: displayedColumns"></tr>
+                </table>
             </div>
         </div>
     </div>

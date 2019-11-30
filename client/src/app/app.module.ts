@@ -1,7 +1,15 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule, MatGridListModule, MatIconModule, MatInputModule, MatProgressBarModule } from '@angular/material';
+import {
+    MatButtonModule,
+    MatGridListModule,
+    MatIconModule,
+    MatInputModule,
+    MatProgressBarModule,
+    MatSort, MatSortModule,
+    MatTableModule
+} from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
@@ -31,6 +39,8 @@ import { metaReducers, reducers } from './store/store';
         MatGridListModule,
         MatInputModule,
         MatIconModule,
+        MatTableModule,
+        MatSortModule,
         MatProgressBarModule,
         BrowserAnimationsModule,
         StoreModule.forRoot(reducers, {

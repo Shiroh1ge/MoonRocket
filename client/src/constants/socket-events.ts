@@ -7,3 +7,7 @@ export const SocketEvents = {
     newLaunch: 'launches.newLaunch',
     getPlayer: 'players.getPlayer'
 };
+
+export const SocketRooms = {
+    user: 'rooms.user_'
+};
