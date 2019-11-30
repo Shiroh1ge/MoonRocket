@@ -157,10 +157,10 @@ const newLaunchFlow = async (playerBets) => {
                     launchId: launch.id
                 };
             });
-            const movements = await movementsRepo.createMovements(movementsData, {transaction});
+            await movementsRepo.createMovements(movementsData, {transaction});
 
             // step 3 Update players new balance
-            const updatedPlayers = await Promise.all(
+            await Promise.all(
                 playerBets.map(playerBet => {
                     return playersRepo.incrementPlayerField(
                         {
@@ -176,8 +176,6 @@ const newLaunchFlow = async (playerBets) => {
 
             return launch;
         });
-
-        console.log('Result after transaction', result);
 
         return result;
     } catch (error) {

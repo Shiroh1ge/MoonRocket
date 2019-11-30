@@ -22,6 +22,7 @@ module.exports = function (sequelize, DataTypes) {
 
     Movement.associate = models => {
         Movement.belongsTo(models.Player, {foreignKey: 'playerId'});
+        Movement.belongsTo(models.Launch, {foreignKey: 'launchId'});
     };
 
     return Movement;

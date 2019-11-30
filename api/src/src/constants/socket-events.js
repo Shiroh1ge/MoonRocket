@@ -10,5 +10,5 @@ module.exports.SocketEvents = {
 };
 
 module.exports.SocketRooms = {
-    joinRoom: 'rooms.user_'
+    user: 'rooms.user_'
 };

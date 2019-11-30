@@ -2,10 +2,11 @@ const launchesRepo = require('../repository/launches.repo');
 const playersRepo = require('../repository/players.repo');
 const movementsRepo = require('../repository/movements.repo');
 const SocketEvents = require('../constants/socket-events').SocketEvents;
+const SocketRooms = require('../constants/socket-events').SocketRooms;
 const Rx = require('rxjs');
 const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
 
-const LAUNCH_CREATION_INTERVAL = 5 * 1000;
+const LAUNCH_CREATION_INTERVAL = 10 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
 
@@ -46,22 +47,17 @@ module.exports = (io) => {
 
     const initLaunchCreation = async () => {
         try {
-            betsFrozen = true;
             stop$.next();
 
-            const playerBets = [...playerBetsBuffer.values()];
+            let playerBets = [...playerBetsBuffer.values()];
             playerBetsBuffer.clear();
 
             const launch = await launchesRepo.newLaunchFlow(playerBets);
-            const movements = await movementsRepo.getMovements({id: launch.id});
-            // console.log('movements after launch created', movements[0].Player);
-            io.emit(SocketEvents.newLaunch, playerBets);
 
-            return launch;
+            return [launch, playerBets];
 
         } catch (error) {
             console.error('Error creating a launch: ', error);
-            playerBetsBuffer.clear();
         }
 
     };
@@ -74,34 +70,40 @@ module.exports = (io) => {
         )
         .subscribe(async (playersBufferMap) => {
                 console.log('playerBetsBufferMap', playersBufferMap);
-                if (playerBetsBuffer.size > 0) {
-                    // init stuff
-                    await initLaunchCreation();
+                let [launch, playerBets] = await initLaunchCreation();
+                const movementPlayerIdMap = (await movementsRepo.getMovements({launchId: launch.id}))
+                    .reduce((result, movement) => {
+                        result[movement.playerId] = movement;
 
-                    // Delay before starting the next launch countdown (show the animation here)
-                    const nextLaunchDelay = 2000;
-                    // Countdown before starting the new launch (after animation ending)
-                    const countdownSeconds = 5;
-                    const timer$ = Rx.timer(nextLaunchDelay, 1000)
-                        .pipe(
-                            map(value => countdownSeconds - value),
-                            take(countdownSeconds)
-                        );
+                        return result;
+                    }, {});
 
-                    timer$.subscribe(val => {
-                            console.log('countdown before next launch: ', val);
-                            io.emit(SocketEvents.newLaunchCountdown, val);
-                        },
-                        error => {
-                            console.log('error in launch', error);
-                        },
-                        complete => {
-                            console.log('Launch has completed, restarting...');
-                            betsFrozen = false;
-                            restart$.next();
-                        }
+
+                playerBets = playerBets.forEach(playerBet => {
+                    playerBet.isWinner = movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0;
+                    io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch, {launch, playerBets});
+                });
+
+                // Delay before starting the next launch countdown (show the animation here)
+                const nextLaunchDelay = 2000;
+                // Countdown before starting the new launch (after animation ending)
+                const countdownSeconds = 5;
+                const timer$ = Rx.timer(nextLaunchDelay, 1000)
+                    .pipe(
+                        map(value => countdownSeconds - value),
+                        take(countdownSeconds)
                     );
-                }
+
+                timer$.subscribe(val => {
+                        console.log('countdown before next launch: ', val);
+                        io.emit(SocketEvents.newLaunchCountdown, val);
+                    },
+                    {},
+                    complete => {
+                        console.log('Launch has completed, restarting...');
+                        restart$.next();
+                    }
+                );
 
             }
         );
