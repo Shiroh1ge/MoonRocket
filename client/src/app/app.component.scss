@@ -38,6 +38,22 @@ svg#clouds {
         flex: 1;
         width: 100%;
         bottom: 0;
+
+        &.float {
+            animation: float 2s infinite;
+
+            @keyframes float {
+                0% {
+                    transform: translateY(0px);
+                }
+                50% {
+                    transform: translateY(-40px);
+                }
+                100% {
+                    transform: translateY(0px);
+                }
+            }
+        }
     }
 
     .rocket-container {
@@ -62,6 +78,14 @@ svg#clouds {
         margin-left: -34px;
         display: block;
         position: absolute;
+        animation: flicker;
+        animation-duration: 0.12s;
+        animation-timing-function: ease;
+        animation-delay: 0s;
+        animation-iteration-count: infinite;
+        animation-direction: normal;
+        animation-fill-mode: none;
+        animation-play-state: running;
     }
 
     .progress-wrapper {
@@ -158,15 +182,15 @@ svg#clouds {
         transform: rotate(2deg) scaleY(1.2);
     }
     40% {
-        transform: rotate(-1deg);
+        transform: rotate(-2deg);
     }
     60% {
-        transform: rotate(1deg);
+        transform: rotate(2deg);
     }
     80% {
-        transform: rotate(-1deg) scaleY(0.9);
+        transform: rotate(-2deg) scaleY(0.9);
     }
     100% {
-        transform: rotate(1deg);
+        transform: rotate(2deg);
     }
 }

@@ -29,6 +29,7 @@ import { metaReducers, reducers } from './store/store';
     ],
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         CoreModule,
         HttpClientModule,
         AppRoutingModule,
@@ -42,7 +43,6 @@ import { metaReducers, reducers } from './store/store';
         MatTableModule,
         MatSortModule,
         MatProgressBarModule,
-        BrowserAnimationsModule,
         StoreModule.forRoot(reducers, {
             metaReducers,
             runtimeChecks: {

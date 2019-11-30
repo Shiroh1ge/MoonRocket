@@ -88,8 +88,6 @@ export class SocketService {
             this.rooms.add(room);
         }
 
-        console.log('room jo', room);
-
         this.emit(SocketEvents.joinRoom, room);
     }
 

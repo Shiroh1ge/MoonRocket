@@ -10,15 +10,17 @@
         <div class="moon-container">
             <img src="/assets/images/moon.png" id="moon">
         </div>
-        <div class="rocket-wrapper">
+        <div class="rocket-wrapper" [@flyUp]="flyAnimationState"
+             [ngClass]="{float: flyAnimationState === FlyAnimationState.UP}">
             <div class="rocket-container">
                 <img src="/assets/images/cat-body.png" id="rocket-body">
-                <img src="/assets/images/cat-flame.png" id="rocket-flame">
+                <img src="/assets/images/cat-flame.png" id="rocket-flame" *ngIf="flyAnimationState === FlyAnimationState.UP">
             </div>
         </div>
         <div class="progress-wrapper">
             <div class="progress-container">
-                <app-progress-bar [value]="25" [max]="100"></app-progress-bar>
+                <span class="result-altitude" *ngIf="launch">{{launch.altitude}}</span>
+                <app-progress-bar [value]="launch?.altitude || 1" [max]="100"></app-progress-bar>
                 <p>{{startingValue}} km</p>
             </div>
         </div>
@@ -62,7 +64,7 @@
         </div>
         <div class="bottom">
             <div class="launch-container">
-                <h2>Current launch</h2>
+                <h2>Bets list</h2>
 
                 <div class="launch-countdown">
                     <p>

@@ -1,8 +1,10 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { SocketEvents, SocketRooms } from '../constants/socket-events';
 import { SocketService } from './core/services/socket.service';
 import { Launch } from './models/launch.model';
+import { Movement } from './models/movement.model';
 import { Player } from './models/player.model';
 import { PlayerActions } from './store/player.actions';
 import { PlayerSelectors } from './store/player.selectors';
@@ -14,10 +16,23 @@ interface PlayerBet {
     userId: string;
 }
 
+enum FlyAnimationState {
+    DOWN = 'down',
+    UP = 'up'
+}
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+    styleUrls: ['./app.component.scss'],
+    animations: [
+        trigger('flyUp', [
+            state(FlyAnimationState.DOWN, style({ bottom: '0' })),
+            state(FlyAnimationState.UP, style({ bottom: '40vh' })),
+            transition(`${FlyAnimationState.DOWN} => ${FlyAnimationState.UP}`, animate('2s ease-in-out')),
+            transition(`${FlyAnimationState.UP} => ${FlyAnimationState.DOWN}`, animate('2s ease-in-out'))
+        ])
+    ]
 })
 export class AppComponent implements OnInit {
     private maximumAltitude: number = 1000;
@@ -29,7 +44,9 @@ export class AppComponent implements OnInit {
     public newLaunchCountdownSeconds: number;
     public playerBets: PlayerBet[] = [];
     public displayedColumns = ['userId', 'amount', 'altitude', 'isWinner'];
-    public launch: Launch;
+    public launch: Launch | null;
+    public flyAnimationState: FlyAnimationState = FlyAnimationState.DOWN;
+    public FlyAnimationState = FlyAnimationState;
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -46,13 +63,13 @@ export class AppComponent implements OnInit {
         };
 
         this.socketService.emit(SocketEvents.bet, data);
+        this.flyAnimationState = FlyAnimationState.UP;
 
     }
 
     ngOnInit() {
         this.socketService.on(SocketEvents.connected)
             .subscribe((socketData: { id: string }) => {
-                console.log('socket ID', socketData);
                 this.socketService.emit(SocketEvents.getPlayer, { userId: socketData.id });
 
                 setTimeout(() => {
@@ -64,9 +81,12 @@ export class AppComponent implements OnInit {
                 this.playerActions.getPlayerSuccessDispatch(player);
             });
         this.socketService.on(SocketEvents.newLaunch)
-            .subscribe((data: { launch: Launch, playerBets: PlayerBet[] }) => {
+            .subscribe((data: { launch: Launch, playerBets: PlayerBet[], currentPlayerMovement: Movement }) => {
                 this.playerBets = data.playerBets;
                 this.launch = data.launch;
+                this.playerActions.updatePlayerDispatch({
+                    balance: this.player.balance + data.currentPlayerMovement.gain
+                });
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

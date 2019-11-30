@@ -81,7 +81,12 @@ module.exports = (io) => {
 
                 playerBets = playerBets.forEach(playerBet => {
                     playerBet.isWinner = movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0;
-                    io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch, {launch, playerBets});
+                    io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch,
+                        {
+                            launch: {altitude: launch.altitude, id: launch.id},
+                            currentPlayerMovement: movementPlayerIdMap[playerBet.playerId],
+                            playerBets
+                        });
                 });
 
                 // Delay before starting the next launch countdown (show the animation here)
