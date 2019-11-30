@@ -6,6 +6,13 @@ import { Player } from './models/player.model';
 import { PlayerActions } from './store/player.actions';
 import { PlayerSelectors } from './store/player.selectors';
 
+interface PlayerBet {
+    altitude: number;
+    amount: number;
+    playerId: number;
+    userId: string;
+}
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -27,7 +34,7 @@ export class AppComponent implements OnInit {
     }
 
     public submitForm(values) {
-        const data = {
+        const data: PlayerBet = {
             altitude: values.altitude,
             amount: values.amount,
             userId: this.player.userId,
@@ -46,6 +53,10 @@ export class AppComponent implements OnInit {
         this.socketService.on(SocketEvents.getPlayer)
             .subscribe((player: Player) => {
                 this.playerActions.getPlayerSuccessDispatch(player);
+            });
+        this.socketService.on(SocketEvents.newLaunch)
+            .subscribe((countDownSeconds) => {
+                this.newLaunchCountdownSeconds = countDownSeconds;
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

@@ -150,7 +150,6 @@ const newLaunchFlow = async (playerBets) => {
             const launch = await createLaunch(launchData, {transaction});
 
             // step 2 - create movements
-
             const movementsData = playerBets.map(playerBet => {
                 return {
                     gain: playerIdGainsMap[playerBet.playerId],
@@ -161,7 +160,6 @@ const newLaunchFlow = async (playerBets) => {
             const movements = await movementsRepo.createMovements(movementsData, {transaction});
 
             // step 3 Update players new balance
-
             const updatedPlayers = await Promise.all(
                 playerBets.map(playerBet => {
                     return playersRepo.incrementPlayerField(
@@ -176,7 +174,7 @@ const newLaunchFlow = async (playerBets) => {
                 })
             );
 
-            return updatedPlayers;
+            return launch;
         });
 
         console.log('Result after transaction', result);

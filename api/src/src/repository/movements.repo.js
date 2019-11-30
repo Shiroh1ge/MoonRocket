@@ -1,4 +1,5 @@
 const Movement = require('../models').Movement;
+const Player = require('../models').Player;
 
 /**
  * Used to find a user in the database.
@@ -19,7 +20,7 @@ const getMovement = async (query, fields = {}, options = {}) => {
  * @returns {Promise.<*>}
  */
 const getMovements = async (query, fields = {}, options = {}) => {
-    return await Movement.findAll({where: query});
+    return await Movement.findAll({where: query, include: [Player]});
 };
 
 /**

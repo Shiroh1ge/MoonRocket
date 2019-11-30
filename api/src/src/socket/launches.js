@@ -1,5 +1,6 @@
 const launchesRepo = require('../repository/launches.repo');
 const playersRepo = require('../repository/players.repo');
+const movementsRepo = require('../repository/movements.repo');
 const SocketEvents = require('../constants/socket-events').SocketEvents;
 const Rx = require('rxjs');
 const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
@@ -17,7 +18,7 @@ let betsFrozen = false;
  * @param betAmount
  * @param playerBalance
  */
-const getValidatedAmount = (betAmount, playerBalance) => {
+const getValidatedBetAmount = (betAmount, playerBalance) => {
     if (betAmount > playerBalance) {
         return playerBalance;
     } else {
@@ -25,30 +26,12 @@ const getValidatedAmount = (betAmount, playerBalance) => {
     }
 };
 
-const initLaunchCreation = async () => {
-    try {
-        betsFrozen = true;
-        stop$.next();
-
-        const playerBets = [...playerBetsBuffer.values()];
-        playerBetsBuffer.clear();
-
-        const launch = await launchesRepo.newLaunchFlow(playerBets);
-
-    } catch (error) {
-        console.error('Error initiating launch: ', error);
-        // We should clear all bets and refund users if there is an error
-        playerBetsBuffer.clear();
-    }
-
-};
-
 module.exports = (io) => {
     io.on('connection', async (socket) => {
         socket.on(SocketEvents.bet, async (data) => {
             // currently we substitute userId with the socket id
             const player = await playersRepo.getPlayer({id: data.playerId});
-            const amount = getValidatedAmount(data.amount, player.balance);
+            const amount = getValidatedBetAmount(data.amount, player.balance);
 
             const playerBetData = {
                 playerId: player.id,
@@ -60,6 +43,28 @@ module.exports = (io) => {
             playerBetsBuffer.set(playerBetData.userId, playerBetData);
         });
     });
+
+    const initLaunchCreation = async () => {
+        try {
+            betsFrozen = true;
+            stop$.next();
+
+            const playerBets = [...playerBetsBuffer.values()];
+            playerBetsBuffer.clear();
+
+            const launch = await launchesRepo.newLaunchFlow(playerBets);
+            const movements = await movementsRepo.getMovements({id: launch.id});
+            // console.log('movements after launch created', movements[0].Player);
+            io.emit(SocketEvents.newLaunch, playerBets);
+
+            return launch;
+
+        } catch (error) {
+            console.error('Error creating a launch: ', error);
+            playerBetsBuffer.clear();
+        }
+
+    };
 
     const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
         .pipe(

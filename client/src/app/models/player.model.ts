@@ -1,5 +1,5 @@
 export interface Player {
-    id: string;
+    id: number;
     userId: string;
     balance: number;
 }

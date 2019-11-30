@@ -4,5 +4,6 @@ export const SocketEvents = {
     leaveRoom: 'rooms.leave',
     bet: 'launches.bet',
     newLaunchCountdown: 'launches.newLaunchCountdown',
+    newLaunch: 'launches.newLaunch',
     getPlayer: 'players.getPlayer'
 };

@@ -20,5 +20,9 @@ module.exports = function (sequelize, DataTypes) {
         }
     );
 
+    Movement.associate = models => {
+        Movement.belongsTo(models.Player, {foreignKey: 'playerId'});
+    };
+
     return Movement;
 };
