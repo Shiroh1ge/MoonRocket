@@ -14,13 +14,33 @@
              [ngClass]="{float: flyAnimationState === FlyAnimationState.UP}">
             <div class="rocket-container">
                 <img src="/assets/images/cat-body.png" id="rocket-body">
-                <img src="/assets/images/cat-flame.png" id="rocket-flame" *ngIf="flyAnimationState === FlyAnimationState.UP">
+                <img src="/assets/images/cat-flame.png" id="rocket-flame"
+                     *ngIf="flyAnimationState === FlyAnimationState.UP">
             </div>
         </div>
         <div class="progress-wrapper">
             <div class="progress-container">
-                <span class="result-altitude" *ngIf="launch">{{launch.altitude}}</span>
-                <app-progress-bar [value]="launch?.altitude || 1" [max]="100"></app-progress-bar>
+                <div class="result-altitude-container">
+<!--                    <div class="launch-countdown">-->
+<!--                        <p>-->
+<!--                            New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds-->
+<!--                        </p>-->
+<!--                    </div>-->
+                    <span class="altitude" *ngIf="betAltitude !== 0">My Bet: {{betAltitude}}</span>
+                </div>
+                <app-progress-bar [value]="getAltitudeProgress(betAltitude)" [max]="100"></app-progress-bar>
+                <p>{{startingValue}} km</p>
+            </div>
+            <div class="progress-container">
+                <div class="result-altitude-container">
+<!--                    <div class="launch-countdown">-->
+<!--                        <p>-->
+<!--                            New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds-->
+<!--                        </p>-->
+<!--                    </div>-->
+                    <span class="result-altitude" *ngIf="launch">Result: {{launch.altitude}}</span>
+                </div>
+                <app-progress-bar [value]="getAltitudeProgress(launch?.altitude)" [max]="100"></app-progress-bar>
                 <p>{{startingValue}} km</p>
             </div>
         </div>
@@ -65,12 +85,6 @@
         <div class="bottom">
             <div class="launch-container">
                 <h2>Bets list</h2>
-
-                <div class="launch-countdown">
-                    <p>
-                        New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
-                    </p>
-                </div>
             </div>
 
             <div class="table-container">

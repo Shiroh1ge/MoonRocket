@@ -19,6 +19,7 @@ svg#clouds {
     position: relative;
     flex-basis: 40%;
     border-right: 2px grey solid;
+    overflow: hidden;
 
     .moon-container {
         position: absolute;
@@ -92,14 +93,12 @@ svg#clouds {
         display: flex;
         margin-left: auto;
         align-items: center;
-        margin-right: 140px;
         position: relative;
     }
 
     .progress-container {
         height: 80%;
-        position: absolute;
-        width: 200px;
+        width: 140px;
     }
 }
 

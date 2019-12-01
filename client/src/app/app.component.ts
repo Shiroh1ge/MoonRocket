@@ -18,7 +18,8 @@ interface PlayerBet {
 
 enum FlyAnimationState {
     DOWN = 'down',
-    UP = 'up'
+    UP = 'up',
+    EXPLODE = 'explode',
 }
 
 @Component({
@@ -29,18 +30,21 @@ enum FlyAnimationState {
         trigger('flyUp', [
             state(FlyAnimationState.DOWN, style({ bottom: '0' })),
             state(FlyAnimationState.UP, style({ bottom: '40vh' })),
+            state(FlyAnimationState.EXPLODE, style({ opacity: 0, transform: 'scale(5) rotate(30deg)' })),
             transition(`${FlyAnimationState.DOWN} => ${FlyAnimationState.UP}`, animate('2s ease-in-out')),
-            transition(`${FlyAnimationState.UP} => ${FlyAnimationState.DOWN}`, animate('2s ease-in-out'))
+            transition(`${FlyAnimationState.UP} => ${FlyAnimationState.DOWN}`, animate('2s ease-in-out')),
+            transition(`${FlyAnimationState.UP} => ${FlyAnimationState.EXPLODE}`, animate('500ms ease-in-out'))
         ])
     ]
 })
 export class AppComponent implements OnInit {
-    private maximumAltitude: number = 1000;
+    private maximumAltitude: number = 100;
     public startingValue: number = 1;
     public player: Player;
     public amount = new FormControl(null, { validators: [Validators.required] });
     public altitude = new FormControl(null, { validators: [Validators.required] });
     public form: FormGroup;
+    public betAltitude: number = 0;
     public newLaunchCountdownSeconds: number;
     public playerBets: PlayerBet[] = [];
     public displayedColumns = ['userId', 'amount', 'altitude', 'isWinner'];
@@ -54,6 +58,18 @@ export class AppComponent implements OnInit {
                 private playersSelectors: PlayerSelectors) {
     }
 
+    private resetLaunchData() {
+        this.launch = null;
+    }
+
+    public getAltitudeProgress(altitude: number | null) {
+        if (!altitude) {
+            return 1;
+        }
+
+        return altitude;
+    }
+
     public submitForm(values) {
         const data: PlayerBet = {
             altitude: values.altitude,
@@ -62,7 +78,10 @@ export class AppComponent implements OnInit {
             playerId: this.player.id
         };
 
+
+        this.resetLaunchData();
         this.socketService.emit(SocketEvents.bet, data);
+        this.betAltitude = data.altitude;
         this.flyAnimationState = FlyAnimationState.UP;
 
     }
@@ -87,6 +106,11 @@ export class AppComponent implements OnInit {
                 this.playerActions.updatePlayerDispatch({
                     balance: this.player.balance + data.currentPlayerMovement.gain
                 });
+
+                this.flyAnimationState = FlyAnimationState.EXPLODE;
+                setTimeout(() => {
+                    this.flyAnimationState = FlyAnimationState.DOWN;
+                }, 2000);
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

@@ -1,4 +1,4 @@
 export interface Movement {
-    id: string;
+    id: number;
     gain: number;
 }
