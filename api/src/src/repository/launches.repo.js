@@ -17,27 +17,6 @@ const getWinnerBetAmount = (betAltitude, betAmount) => {
     return betAltitude * betAmount;
 };
 
-/**
- * Calculate the gain from a bet. Can be negative
- * @param {number} winningAltitude
- * @param {number} betAmount
- * @param {number} betAltitude
- * @returns {number}
- */
-// const calculateBetGain = (winningAltitude, betAltitude, betAmount) => {
-//     if (betAmount === 0) {
-//         return 0;
-//     }
-//
-//     if (winningAltitude <= betAltitude) {
-//         return getWinnerBetAmount(betAltitude, betAmount);
-//     }
-//
-//     if (winningAltitude > betAltitude) {
-//         return -betAmount;
-//     }
-//
-// };
 
 /**
  * Calculate betting results for a given altitude

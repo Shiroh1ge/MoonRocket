@@ -12,8 +12,6 @@ const restart$ = new Rx.Subject();
 
 const playerBetsBuffer = new Map();
 
-let betsFrozen = false;
-
 /**
  * Checks if bet amount is higher than player balance, if it's higher, returns the maximum player balance.
  * @param betAmount
@@ -41,6 +39,7 @@ module.exports = (io) => {
                 altitude: data.altitude
             };
 
+            socket.join(SocketRooms.launch);
             playerBetsBuffer.set(playerBetData.userId, playerBetData);
         });
     });
@@ -62,6 +61,29 @@ module.exports = (io) => {
 
     };
 
+    const reInitLaunch = () => {
+        // Delay before starting the next launch countdown (show the animation here)
+        const nextLaunchDelay = 2000;
+        // Countdown before starting the new launch (after animation ending)
+        const countdownSeconds = 5;
+        const timer$ = Rx.timer(nextLaunchDelay, 1000)
+            .pipe(
+                map(value => countdownSeconds - value),
+                take(countdownSeconds)
+            );
+
+        timer$.subscribe(val => {
+                console.log('countdown before next launch: ', val);
+                io.emit(SocketEvents.newLaunchCountdown, val);
+            },
+            {},
+            complete => {
+                console.log('Launch has completed, restarting...');
+                restart$.next();
+            }
+        );
+    };
+
     const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
         .pipe(
             map(int => playerBetsBuffer),
@@ -69,8 +91,8 @@ module.exports = (io) => {
             repeatWhen(() => restart$)
         )
         .subscribe(async (playersBufferMap) => {
-                console.log('playerBetsBufferMap', playersBufferMap);
                 let [launch, playerBets] = await initLaunchCreation();
+
                 const movementPlayerIdMap = (await movementsRepo.getMovements({launchId: launch.id}))
                     .reduce((result, movement) => {
                         result[movement.playerId] = movement;
@@ -89,27 +111,7 @@ module.exports = (io) => {
                         });
                 });
 
-                // Delay before starting the next launch countdown (show the animation here)
-                const nextLaunchDelay = 2000;
-                // Countdown before starting the new launch (after animation ending)
-                const countdownSeconds = 5;
-                const timer$ = Rx.timer(nextLaunchDelay, 1000)
-                    .pipe(
-                        map(value => countdownSeconds - value),
-                        take(countdownSeconds)
-                    );
-
-                timer$.subscribe(val => {
-                        console.log('countdown before next launch: ', val);
-                        io.emit(SocketEvents.newLaunchCountdown, val);
-                    },
-                    {},
-                    complete => {
-                        console.log('Launch has completed, restarting...');
-                        restart$.next();
-                    }
-                );
-
+                reInitLaunch();
             }
         );
 };

@@ -10,5 +10,6 @@ module.exports.SocketEvents = {
 };
 
 module.exports.SocketRooms = {
-    user: 'rooms.user_'
+    user: 'rooms.user_',
+    launch: 'rooms.launch',
 };
