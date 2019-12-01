@@ -5,7 +5,7 @@ const SocketEvents = require('../constants/socket-events').SocketEvents;
 const SocketRooms = require('../constants/socket-events').SocketRooms;
 const Rx = require('rxjs');
 const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
-
+const errors = require('../helpers/errors');
 const LAUNCH_CREATION_INTERVAL = 10 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
@@ -39,23 +39,26 @@ module.exports = (io) => {
                 altitude: data.altitude
             };
 
-            socket.join(SocketRooms.launch);
             playerBetsBuffer.set(playerBetData.userId, playerBetData);
         });
     });
 
     const initLaunchCreation = async () => {
+        let playerBets = [...playerBetsBuffer.values()];
+        playerBetsBuffer.clear();
+        stop$.next();
+
         try {
-            stop$.next();
-
-            let playerBets = [...playerBetsBuffer.values()];
-            playerBetsBuffer.clear();
-
             const launch = await launchesRepo.newLaunchFlow(playerBets);
 
             return [launch, playerBets];
 
         } catch (error) {
+            playerBets.forEach(playerBet => {
+                io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.error, errors.unsuccessfulLaunch);
+            });
+            reInitLaunch();
+
             console.error('Error creating a launch: ', error);
         }
 
@@ -63,7 +66,7 @@ module.exports = (io) => {
 
     const reInitLaunch = () => {
         // Delay before starting the next launch countdown (show the animation here)
-        const nextLaunchDelay = 2000;
+        const nextLaunchDelay = 0;
         // Countdown before starting the new launch (after animation ending)
         const countdownSeconds = 5;
         const timer$ = Rx.timer(nextLaunchDelay, 1000)
@@ -86,11 +89,10 @@ module.exports = (io) => {
 
     const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
         .pipe(
-            map(int => playerBetsBuffer),
             takeUntil(stop$),
             repeatWhen(() => restart$)
         )
-        .subscribe(async (playersBufferMap) => {
+        .subscribe(async (value) => {
                 let [launch, playerBets] = await initLaunchCreation();
 
                 const movementPlayerIdMap = (await movementsRepo.getMovements({launchId: launch.id}))
@@ -99,7 +101,6 @@ module.exports = (io) => {
 
                         return result;
                     }, {});
-
 
                 playerBets = playerBets.forEach(playerBet => {
                     playerBet.isWinner = movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0;

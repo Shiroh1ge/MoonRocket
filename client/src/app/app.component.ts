@@ -1,11 +1,13 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ErrorCodes } from '../constants/error-codes';
 import { SocketEvents, SocketRooms } from '../constants/socket-events';
 import { SocketService } from './core/services/socket.service';
 import { Launch } from './models/launch.model';
 import { Movement } from './models/movement.model';
 import { Player } from './models/player.model';
+import { ServiceError } from './models/service-error.model';
 import { PlayerActions } from './store/player.actions';
 import { PlayerSelectors } from './store/player.selectors';
 
@@ -51,6 +53,7 @@ export class AppComponent implements OnInit {
     public launch: Launch | null;
     public flyAnimationState: FlyAnimationState = FlyAnimationState.DOWN;
     public FlyAnimationState = FlyAnimationState;
+    public error: ServiceError | null;
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -60,6 +63,7 @@ export class AppComponent implements OnInit {
 
     private resetLaunchData() {
         this.launch = null;
+        this.error = null;
     }
 
     public getAltitudeProgress(altitude: number | null) {
@@ -77,7 +81,6 @@ export class AppComponent implements OnInit {
             userId: this.player.userId,
             playerId: this.player.id
         };
-
 
         this.resetLaunchData();
         this.socketService.emit(SocketEvents.bet, data);
@@ -115,6 +118,19 @@ export class AppComponent implements OnInit {
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {
                 this.newLaunchCountdownSeconds = countDownSeconds;
+            });
+        this.socketService.on(SocketEvents.error)
+            .subscribe((error: ServiceError) => {
+                console.log('err', error);
+               console.log(error.errorCode);
+               console.log(ErrorCodes.unsuccessfulLaunch);
+
+                if (error.errorCode === ErrorCodes.unsuccessfulLaunch) {
+
+                    this.resetLaunchData();
+                    this.flyAnimationState = FlyAnimationState.DOWN;
+                    this.error = error;
+                }
             });
 
         this.playersSelectors.player$

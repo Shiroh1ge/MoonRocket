@@ -1,5 +1,6 @@
 module.exports.SocketEvents = {
     connected: 'connected',
+    error: 'error',
     joinRoom: 'rooms.join',
     leaveRoom: 'rooms.leave',
     bet: 'launches.bet',
@@ -11,5 +12,5 @@ module.exports.SocketEvents = {
 
 module.exports.SocketRooms = {
     user: 'rooms.user_',
-    launch: 'rooms.launch',
+    launch: 'rooms.launch'
 };

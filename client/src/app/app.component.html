@@ -19,13 +19,13 @@
             </div>
         </div>
         <div class="progress-wrapper">
+            <div class="launch-countdown">
+                <p>
+                    New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
+                </p>
+            </div>
             <div class="progress-container">
                 <div class="result-altitude-container">
-<!--                    <div class="launch-countdown">-->
-<!--                        <p>-->
-<!--                            New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds-->
-<!--                        </p>-->
-<!--                    </div>-->
                     <span class="altitude" *ngIf="betAltitude !== 0">My Bet: {{betAltitude}}</span>
                 </div>
                 <app-progress-bar [value]="getAltitudeProgress(betAltitude)" [max]="100"></app-progress-bar>
@@ -33,11 +33,6 @@
             </div>
             <div class="progress-container">
                 <div class="result-altitude-container">
-<!--                    <div class="launch-countdown">-->
-<!--                        <p>-->
-<!--                            New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds-->
-<!--                        </p>-->
-<!--                    </div>-->
                     <span class="result-altitude" *ngIf="launch">Result: {{launch.altitude}}</span>
                 </div>
                 <app-progress-bar [value]="getAltitudeProgress(launch?.altitude)" [max]="100"></app-progress-bar>
@@ -77,6 +72,8 @@
                             [disabled]="!form.controls.amount?.value || !form.controls.altitude?.value"
                             (click)="submitForm(form.value)">Bet
                     </button>
+
+                    <p class="field-error" *ngIf="error">{{error.message}}</p>
                 </form>
             </div>
 

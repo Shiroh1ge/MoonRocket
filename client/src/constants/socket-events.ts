@@ -1,5 +1,6 @@
 export const SocketEvents = {
     connected: 'connected',
+    error: 'error',
     joinRoom: 'rooms.join',
     leaveRoom: 'rooms.leave',
     bet: 'launches.bet',

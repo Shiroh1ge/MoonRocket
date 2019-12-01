@@ -57,7 +57,6 @@ const calculateBettingResults = (winningAltitude, playerBets) => {
     return {totalBetAmount, totalLostAmount, totalWonAmount, playerIdGainsMap};
 };
 
-
 /**
  * Used to find a launch in the database.
  * @param {object} query

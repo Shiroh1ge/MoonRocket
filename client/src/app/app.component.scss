@@ -48,7 +48,7 @@ svg#clouds {
                     transform: translateY(0px);
                 }
                 50% {
-                    transform: translateY(-40px);
+                    transform: translateY(-30px);
                 }
                 100% {
                     transform: translateY(0px);
@@ -99,6 +99,10 @@ svg#clouds {
     .progress-container {
         height: 80%;
         width: 140px;
+    }
+
+    .launch-countdown {
+        position: absolute;
     }
 }
 
