@@ -96,7 +96,7 @@ export class AppComponent implements OnInit {
 
                 setTimeout(() => {
                     this.socketService.joinRoom(SocketRooms.user + socketData.id);
-                }, 250);
+                }, 150);
             });
         this.socketService.on(SocketEvents.getPlayer)
             .subscribe((player: Player) => {
