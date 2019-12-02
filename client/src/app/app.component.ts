@@ -110,6 +110,10 @@ export class AppComponent implements OnInit {
                     balance: this.player.balance + data.currentPlayerMovement.gain
                 });
 
+                if (this.amount.value > this.player.balance) {
+                    this.amount.patchValue(this.player.balance);
+                }
+
                 this.flyAnimationState = FlyAnimationState.EXPLODE;
                 setTimeout(() => {
                     this.flyAnimationState = FlyAnimationState.DOWN;
@@ -121,12 +125,7 @@ export class AppComponent implements OnInit {
             });
         this.socketService.on(SocketEvents.error)
             .subscribe((error: ServiceError) => {
-                console.log('err', error);
-               console.log(error.errorCode);
-               console.log(ErrorCodes.unsuccessfulLaunch);
-
                 if (error.errorCode === ErrorCodes.unsuccessfulLaunch) {
-
                     this.resetLaunchData();
                     this.flyAnimationState = FlyAnimationState.DOWN;
                     this.error = error;

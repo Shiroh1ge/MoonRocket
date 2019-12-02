@@ -49,7 +49,6 @@ module.exports = (io) => {
         stop$.next();
 
         try {
-            throw 'ba'
             const launch = await launchesRepo.newLaunchFlow(playerBets);
 
             return [launch, playerBets];
@@ -59,8 +58,9 @@ module.exports = (io) => {
                 io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.error, errors.unsuccessfulLaunch);
             });
             reInitLaunch();
-
             console.error('Error creating a launch: ', error);
+            throw new Error(errors.unsuccessfulLaunch);
+
         }
 
     };
@@ -103,8 +103,15 @@ module.exports = (io) => {
                         return result;
                     }, {});
 
-                playerBets = playerBets.forEach(playerBet => {
-                    playerBet.isWinner = movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0;
+
+                playerBets = playerBets.map(playerBet => {
+                    return {
+                        ...playerBet,
+                        isWinner: movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0
+                    };
+                });
+
+                playerBets.forEach(playerBet => {
                     io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch,
                         {
                             launch: {altitude: launch.altitude, id: launch.id},

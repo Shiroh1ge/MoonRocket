@@ -6,7 +6,7 @@ const sequelize = require('../models').sequelize;
 const getLaunchAltitude = () => {
     const min = 1;
     const max = 100;
-
+    return 20
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
