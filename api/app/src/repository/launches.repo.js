@@ -53,11 +53,6 @@ const calculateBettingResults = (winningAltitude, playerBets) => {
 
     });
 
-    console.log('totalbetamount', totalBetAmount);
-    console.log('totalLostAmouint', totalLostAmount);
-    console.log('totalWonAmount', totalWonAmount);
-    console.log('playerIdGainsMap', playerIdGainsMap);
-
     return {totalBetAmount, totalLostAmount, totalWonAmount, playerIdGainsMap};
 };
 
