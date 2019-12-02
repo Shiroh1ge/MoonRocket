@@ -106,7 +106,7 @@ const createLaunch = async (launchData, options = {}) => {
  */
 const newLaunchFlow = async (playerBets) => {
     try {
-        let result = await sequelize.transaction(async (transaction) => {
+        const result = await sequelize.transaction(async (transaction) => {
             const altitude = getLaunchAltitude();
 
             const {
