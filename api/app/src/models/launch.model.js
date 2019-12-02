@@ -17,7 +17,7 @@ module.exports = function (sequelize, DataTypes) {
             totalWonAmount: {type: DataTypes.INTEGER}
         },
         {
-            freezeTableName: true
+            tableName: 'launches'
         }
     );
 
