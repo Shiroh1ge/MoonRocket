@@ -49,6 +49,7 @@ module.exports = (io) => {
         stop$.next();
 
         try {
+            throw 'ba'
             const launch = await launchesRepo.newLaunchFlow(playerBets);
 
             return [launch, playerBets];
