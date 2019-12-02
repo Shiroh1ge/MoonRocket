@@ -138,7 +138,7 @@ const newLaunchFlow = async (playerBets) => {
                     launchId: launch.id
                 };
             });
-            await movementsRepo.createMovements(movementsData, {transaction});
+          const movements = await movementsRepo.createMovements(movementsData, {transaction});
 
             // step 3 Update players new balance
             await Promise.all(
@@ -155,12 +155,13 @@ const newLaunchFlow = async (playerBets) => {
                 })
             );
 
-            return launch;
+            return [launch, movements];
         });
 
         return result;
     } catch (error) {
         console.log('Error finalizing new launch flow: ', error);
+        throw error;
     }
 };
 

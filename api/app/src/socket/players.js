@@ -20,8 +20,11 @@ const getOrCreatePlayer = async (userId) => {
 module.exports = (io) => {
     io.on('connection', async (socket) => {
         socket.emit(SocketEvents.connected, {id: socket.id});
-        const player = await getOrCreatePlayer(socket.id);
-        socket.emit(SocketEvents.getPlayer, player);
+
+        socket.on(SocketEvents.getPlayer, async (data) => {
+            const player = await getOrCreatePlayer(data.userId);
+            socket.emit(SocketEvents.getPlayer, player);
+        });
 
         socket.on(SocketEvents.joinRoom, (room) => {
             socket.join(room);

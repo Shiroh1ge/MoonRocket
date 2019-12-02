@@ -49,9 +49,32 @@ module.exports = (io) => {
         stop$.next();
 
         try {
-            const launch = await launchesRepo.newLaunchFlow(playerBets);
+            const [launch, movements] = await launchesRepo.newLaunchFlow(playerBets);
 
-            return [launch, playerBets];
+            const movementPlayerIdMap = movements
+                .reduce((result, movement) => {
+                    result[movement.playerId] = movement;
+
+                    return result;
+                }, {});
+
+            playerBets = playerBets.map(playerBet => {
+                return {
+                    ...playerBet,
+                    isWinner: movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0
+                };
+            });
+
+            playerBets.forEach(playerBet => {
+                io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch,
+                    {
+                        launch: {altitude: launch.altitude, id: launch.id},
+                        currentPlayerMovement: movementPlayerIdMap[playerBet.playerId],
+                        playerBets
+                    });
+            });
+
+            return [launch, playerBets, movementPlayerIdMap];
 
         } catch (error) {
             playerBets.forEach(playerBet => {
@@ -94,31 +117,7 @@ module.exports = (io) => {
             repeatWhen(() => restart$)
         )
         .subscribe(async (value) => {
-                let [launch, playerBets] = await initLaunchCreation();
-
-                const movementPlayerIdMap = (await movementsRepo.getMovements({launchId: launch.id}))
-                    .reduce((result, movement) => {
-                        result[movement.playerId] = movement;
-
-                        return result;
-                    }, {});
-
-
-                playerBets = playerBets.map(playerBet => {
-                    return {
-                        ...playerBet,
-                        isWinner: movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0
-                    };
-                });
-
-                playerBets.forEach(playerBet => {
-                    io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch,
-                        {
-                            launch: {altitude: launch.altitude, id: launch.id},
-                            currentPlayerMovement: movementPlayerIdMap[playerBet.playerId],
-                            playerBets
-                        });
-                });
+                await initLaunchCreation();
 
                 reInitLaunch();
             }
