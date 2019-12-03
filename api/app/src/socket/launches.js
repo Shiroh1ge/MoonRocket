@@ -8,15 +8,20 @@ const {takeUntil, repeatWhen} = require('rxjs/operators');
 const errors = require('../helpers/errors');
 const LAUNCH_CREATION_INTERVAL = 10 * 1000;
 const LAUNCH_DELAY = 3 * 1000;
-const LAUNCH_DURATION = 5 * 1000;
+const LAUNCH_MINIMUM_DURATION = 5 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
 
 const playerBetsBuffer = new Map();
 
-function timeout(ms = 1000) {
+const timeout = (ms = 1000) => {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
+};
+const getLaunchDuration = (altitude) => {
+    const minimumDuration = 4000;
+
+    return minimumDuration + (altitude / 10 * 1000);
+};
 
 /**
  * Checks if bet amount is higher than player balance, if it's higher, returns the maximum player balance.
@@ -66,7 +71,6 @@ module.exports = (io) => {
         try {
             console.time('Creating new launch...');
             const [launch, movements] = await launchesRepo.newLaunchFlow(playerBets);
-
             const movementPlayerIdMap = movements
                 .reduce((result, movement) => {
                     result[movement.playerId] = movement;
@@ -76,8 +80,15 @@ module.exports = (io) => {
 
             io.to(SocketRooms.launches).emit(SocketEvents.newBets, {playerBets});
             await timeout(LAUNCH_DELAY);
-            io.to(SocketRooms.launches).emit(SocketEvents.newLaunch, {launch});
-            await timeout(LAUNCH_DURATION);
+
+            const launchDuration = getLaunchDuration(launch.altitude);
+            io.to(SocketRooms.launches).emit(SocketEvents.launchInitiated, {
+                launch,
+                launchDuration,
+                movementPlayerIdMap
+            });
+            await timeout(launchDuration);
+
             io.to(SocketRooms.launches).emit(SocketEvents.launchCompleted, {movementPlayerIdMap});
 
             return launch;

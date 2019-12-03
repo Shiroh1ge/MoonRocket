@@ -5,7 +5,7 @@ export const SocketEvents = {
     leaveRoom: 'rooms.leave',
     bet: 'launches.bet',
     newLaunchCountdown: 'launches.newLaunchCountdown',
-    newLaunch: 'launches.newLaunch',
+    launchInitiated: 'launches.launchInitiated',
     launchCompleted: 'launches.launchCompleted',
     newBets: 'launches.newBets',
     playerConnected: 'players.playerConnected',

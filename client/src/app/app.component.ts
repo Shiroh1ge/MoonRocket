@@ -1,7 +1,9 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { MatSort, MatTableDataSource } from '@angular/material';
+import { interval, timer } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ErrorCodes } from '../constants/error-codes';
 import { SocketEvents, SocketRooms } from '../constants/socket-events';
 import { SocketService } from './core/services/socket.service';
@@ -26,8 +28,6 @@ enum FlyAnimationState {
     EXPLODE = 'explode',
 }
 
-const LAUNCH_DURATION = 5000;
-
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -44,8 +44,8 @@ const LAUNCH_DURATION = 5000;
     ]
 })
 export class AppComponent implements OnInit {
+    @ViewChild(MatSort, { static: true }) sort: MatSort;
     private maximumAltitude: number = 100;
-    private animationSubject = new Subject();
     public startingValue: number = 1;
     public player: Player;
     public amount = new FormControl(null, { validators: [Validators.required] });
@@ -60,6 +60,8 @@ export class AppComponent implements OnInit {
     public FlyAnimationState = FlyAnimationState;
     public error: ServiceError | null;
     public movementPlayerIdMap: { [playerId: string]: Movement } = {};
+    public resultAltitude: number = 0;
+    public dataSource = new MatTableDataSource<PlayerBet>();
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -67,18 +69,18 @@ export class AppComponent implements OnInit {
                 private playersSelectors: PlayerSelectors) {
     }
 
+
+    private getLaunchDuration(altitude) {
+        const minimumDuration = 4000;
+        return minimumDuration + (altitude / 10 * 1000);
+    }
+
+
     private resetLaunchData() {
         this.launch = null;
         this.error = null;
         this.movementPlayerIdMap = {};
-    }
-
-    public getAltitudeProgress(altitude: number | null) {
-        if (!altitude) {
-            return 1;
-        }
-
-        return altitude;
+        this.resultAltitude = 0;
     }
 
     public submitForm(values) {
@@ -89,12 +91,13 @@ export class AppComponent implements OnInit {
             playerId: this.player.id
         };
 
-        this.resetLaunchData();
         this.socketService.emit(SocketEvents.bet, data);
         this.betAltitude = data.altitude;
     }
 
     ngOnInit() {
+        this.dataSource.sort = this.sort;
+
         this.socketService.on(SocketEvents.playerConnected)
             .subscribe((socketData: { id: string }) => {
                 setTimeout(() => {
@@ -109,34 +112,73 @@ export class AppComponent implements OnInit {
             });
         this.socketService.on(SocketEvents.newBets)
             .subscribe((data: { playerBets: PlayerBet[] }) => {
-                this.playerBets = data.playerBets;
-
+                this.resetLaunchData();
+                this.dataSource.data = data.playerBets;
             });
 
-        this.socketService.on(SocketEvents.newLaunch)
-            .subscribe(({ launch }: { launch: Launch }) => {
-                this.resetLaunchData();
+        this.socketService.on(SocketEvents.launchInitiated)
+            .subscribe(({ launch, launchDuration, movementPlayerIdMap }:
+                            {
+                                launch: Launch;
+                                launchDuration: number;
+                                movementPlayerIdMap: { [playerId: string]: Movement }
+                            }) => {
                 this.flyAnimationState = FlyAnimationState.UP;
-                this.launch = launch;
+                const timer$ = timer(launchDuration); // time in ms
+
+                const animationInterval = 50;
+                let accumulator = launchDuration / animationInterval;
+
+                const animation$ = interval(animationInterval)
+                    .pipe(
+                        takeUntil(timer$)
+                    )
+                    .subscribe(val => {
+                            accumulator += animationInterval;
+                            const progress = accumulator / launchDuration;
+                            const currentAltitude = progress * launch.altitude;
+
+                            if (currentAltitude >= launch.altitude) {
+                                this.resultAltitude = launch.altitude;
+                            } else {
+                                this.resultAltitude = currentAltitude;
+                            }
+
+                            this.playerBets.forEach(playerBet => {
+                                if (playerBet.altitude >= this.resultAltitude) {
+                                    this.movementPlayerIdMap[playerBet.playerId] = movementPlayerIdMap[playerBet.playerId];
+                                }
+                            });
+
+                            console.log('res', this.resultAltitude);
+
+                        },
+                        () => {
+                        },
+                        () => {
+                            this.resultAltitude = launch.altitude;
+                        }
+                    );
             });
         this.socketService.on(SocketEvents.launchCompleted)
             .subscribe(({ movementPlayerIdMap }: { movementPlayerIdMap: { [playerId: string]: Movement } }) => {
                 this.movementPlayerIdMap = movementPlayerIdMap;
-                if (movementPlayerIdMap[this.player.id]) {
-                    this.playerActions.updatePlayerDispatch({
-                        balance: this.player.balance + movementPlayerIdMap[this.player.id].gain
-                    });
-                }
-
-                if (this.amount.value > this.player.balance) {
-                    this.amount.patchValue(this.player.balance);
-                }
-
                 this.flyAnimationState = FlyAnimationState.EXPLODE;
 
                 setTimeout(() => {
                     this.flyAnimationState = FlyAnimationState.DOWN;
-                }, 1000);
+                }, 2000);
+
+                if (movementPlayerIdMap[this.player.id]) {
+                    this.playerActions.updatePlayerDispatch({
+                        balance: this.player.balance + movementPlayerIdMap[this.player.id].gain
+                    });
+
+                    if (this.amount.value > this.player.balance) {
+                        this.amount.patchValue(this.player.balance);
+                    }
+                }
+
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

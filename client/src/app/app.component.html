@@ -21,9 +21,9 @@
         <div class="progress-wrapper">
             <div class="progress-container">
                 <div class="result-altitude-container">
-                    <span class="result-altitude" *ngIf="launch">Result: {{launch.altitude}}</span>
+                    <span class="result-altitude" *ngIf="resultAltitude !== 0">Result: {{resultAltitude | number:'1.0-0' }}</span>
                 </div>
-                <app-progress-bar [value]="getAltitudeProgress(launch?.altitude)" [max]="100"></app-progress-bar>
+                <app-progress-bar [value]="resultAltitude" [max]="100"></app-progress-bar>
                 <p>{{startingValue}} km</p>
             </div>
         </div>
@@ -75,12 +75,13 @@
             </div>
 
             <div class="table-container">
-                <table mat-table [dataSource]="playerBets"
+                <table mat-table [dataSource]="dataSource"
                        style="width: 100%"
                        matSortDisableClear
                        matSort
                        class="mat-table"
-                       matSortActive="createdAt" matSortDirection="desc">
+                       matSortActive="altitude"
+                       matSortDirection="desc">
 
                     <ng-container matColumnDef="userId">
                         <th mat-header-cell mat-sort-header *matHeaderCellDef>User</th>
@@ -119,8 +120,7 @@
                                 'winner': movementPlayerIdMap[element.playerId].gain > 0,
                                 'loser': movementPlayerIdMap[element.playerId].gain < 0
                             }">
-                                {{movementPlayerIdMap[element.playerId].gain >= 0 ? '+' : ''}}
-                                {{movementPlayerIdMap[element.playerId].gain}}
+                                {{movementPlayerIdMap[element.playerId].gain >= 0 ? '+' : ''}}{{movementPlayerIdMap[element.playerId].gain}}
                             </span>
 
                         </td>
