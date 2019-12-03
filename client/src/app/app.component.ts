@@ -1,6 +1,7 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Subject } from 'rxjs';
 import { ErrorCodes } from '../constants/error-codes';
 import { SocketEvents, SocketRooms } from '../constants/socket-events';
 import { SocketService } from './core/services/socket.service';
@@ -25,6 +26,8 @@ enum FlyAnimationState {
     EXPLODE = 'explode',
 }
 
+const LAUNCH_DURATION = 5000;
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -42,6 +45,7 @@ enum FlyAnimationState {
 })
 export class AppComponent implements OnInit {
     private maximumAltitude: number = 100;
+    private animationSubject = new Subject();
     public startingValue: number = 1;
     public player: Player;
     public amount = new FormControl(null, { validators: [Validators.required] });
@@ -55,6 +59,7 @@ export class AppComponent implements OnInit {
     public flyAnimationState: FlyAnimationState = FlyAnimationState.DOWN;
     public FlyAnimationState = FlyAnimationState;
     public error: ServiceError | null;
+    public movementPlayerIdMap: { [playerId: string]: Movement } = {};
 
     constructor(private socketService: SocketService,
                 private playerActions: PlayerActions,
@@ -65,6 +70,7 @@ export class AppComponent implements OnInit {
     private resetLaunchData() {
         this.launch = null;
         this.error = null;
+        this.movementPlayerIdMap = {};
     }
 
     public getAltitudeProgress(altitude: number | null) {
@@ -108,15 +114,17 @@ export class AppComponent implements OnInit {
             });
 
         this.socketService.on(SocketEvents.newLaunch)
-            .subscribe((data: {
-                launch: Launch,
-                movementPlayerIdMap: { [playerId: string]: Movement }
-            }) => {
-                this.launch = data.launch;
-
-                if (data.movementPlayerIdMap[this.player.id]) {
+            .subscribe(({ launch }: { launch: Launch }) => {
+                this.resetLaunchData();
+                this.flyAnimationState = FlyAnimationState.UP;
+                this.launch = launch;
+            });
+        this.socketService.on(SocketEvents.launchCompleted)
+            .subscribe(({ movementPlayerIdMap }: { movementPlayerIdMap: { [playerId: string]: Movement } }) => {
+                this.movementPlayerIdMap = movementPlayerIdMap;
+                if (movementPlayerIdMap[this.player.id]) {
                     this.playerActions.updatePlayerDispatch({
-                        balance: this.player.balance + data.movementPlayerIdMap[this.player.id].gain
+                        balance: this.player.balance + movementPlayerIdMap[this.player.id].gain
                     });
                 }
 
@@ -124,12 +132,11 @@ export class AppComponent implements OnInit {
                     this.amount.patchValue(this.player.balance);
                 }
 
-                this.flyAnimationState = FlyAnimationState.UP;
-                // this.flyAnimationState = FlyAnimationState.EXPLODE;
-                // setTimeout(() => {
-                //     this.flyAnimationState = FlyAnimationState.DOWN;
-                // }, 2000);
+                this.flyAnimationState = FlyAnimationState.EXPLODE;
 
+                setTimeout(() => {
+                    this.flyAnimationState = FlyAnimationState.DOWN;
+                }, 1000);
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {

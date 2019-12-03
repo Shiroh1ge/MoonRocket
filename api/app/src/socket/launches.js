@@ -7,10 +7,16 @@ const Rx = require('rxjs');
 const {takeUntil, repeatWhen} = require('rxjs/operators');
 const errors = require('../helpers/errors');
 const LAUNCH_CREATION_INTERVAL = 10 * 1000;
+const LAUNCH_DELAY = 3 * 1000;
+const LAUNCH_DURATION = 5 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
 
 const playerBetsBuffer = new Map();
+
+function timeout(ms = 1000) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 /**
  * Checks if bet amount is higher than player balance, if it's higher, returns the maximum player balance.
@@ -58,8 +64,7 @@ module.exports = (io) => {
         stop$.next();
 
         try {
-            console.log('Creating new launch...');
-            // throw 'bako';
+            console.time('Creating new launch...');
             const [launch, movements] = await launchesRepo.newLaunchFlow(playerBets);
 
             const movementPlayerIdMap = movements
@@ -69,20 +74,11 @@ module.exports = (io) => {
                     return result;
                 }, {});
 
-            io.to(SocketRooms.launches).emit(SocketEvents.newBets,
-                {
-                    playerBets
-                });
-
-            setTimeout(() => {
-                io.to(SocketRooms.launches).emit(SocketEvents.newLaunch,
-                    {
-                        launch,
-                        movementPlayerIdMap
-                    });
-                reInitLaunch();
-
-            }, 2000);
+            io.to(SocketRooms.launches).emit(SocketEvents.newBets, {playerBets});
+            await timeout(LAUNCH_DELAY);
+            io.to(SocketRooms.launches).emit(SocketEvents.newLaunch, {launch});
+            await timeout(LAUNCH_DURATION);
+            io.to(SocketRooms.launches).emit(SocketEvents.launchCompleted, {movementPlayerIdMap});
 
             return launch;
 
@@ -103,6 +99,7 @@ module.exports = (io) => {
         )
         .subscribe(async (value) => {
                 await initLaunchCreation();
+                reInitLaunch();
             }
         );
 };

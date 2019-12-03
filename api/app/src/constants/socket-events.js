@@ -7,6 +7,7 @@ module.exports.SocketEvents = {
     joinLaunch: 'launches.joinLaunch',
     newLaunchCountdown: 'launches.newLaunchCountdown',
     newLaunch: 'launches.newLaunch',
+    launchCompleted: 'launches.launchCompleted',
     newBets: 'launches.newBets',
     getPlayer: 'players.getPlayer'
 };
