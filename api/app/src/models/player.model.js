@@ -9,7 +9,13 @@ module.exports = function (sequelize, DataTypes) {
                 allowNull: false
             },
             userId: {type: DataTypes.STRING, unique: true, allowNull: false},
-            balance: {type: DataTypes.INTEGER, defaultValue: 10}
+            balance: {
+                type: DataTypes.INTEGER,
+                defaultValue: 10,
+                validate: {
+                    min: 0
+                }
+            }
         },
         {
             tableName: 'players'
