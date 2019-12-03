@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { createAction, props, Store } from '@ngrx/store';
-import { Player } from '../models/player.model';
-import { GlobalState } from './store';
+import { Player } from '../../models/player.model';
+import { GlobalState } from '../store';
 
 const getPlayer = createAction(
     'GET_PLAYER',

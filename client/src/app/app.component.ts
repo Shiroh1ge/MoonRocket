@@ -11,8 +11,8 @@ import { Launch } from './models/launch.model';
 import { Movement } from './models/movement.model';
 import { Player } from './models/player.model';
 import { ServiceError } from './models/service-error.model';
-import { PlayerActions } from './store/player.actions';
-import { PlayerSelectors } from './store/player.selectors';
+import { PlayerActions } from './store/actions/player.actions';
+import { PlayerSelectors } from './store/selectors/player.selectors';
 
 interface PlayerBet {
     altitude: number;
@@ -150,7 +150,6 @@ export class AppComponent implements OnInit {
                                     console.log(playerBet);
 
                                     this.movementPlayerIdMap[playerBet.playerId] = movementPlayerIdMap[playerBet.playerId];
-                                    console.log('map', this.movementPlayerIdMap);
                                 }
                             });
                         },

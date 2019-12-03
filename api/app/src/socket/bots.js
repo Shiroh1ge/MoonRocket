@@ -49,8 +49,6 @@ module.exports = async (io) => {
         botUserIds.map(userId => playersRepo.getOrCreatePlayer({userId}, {balance: DEFAULT_BOT_BALANCE}))
     );
 
-    console.log('Got bot players...');
-
     // We wait for the sockets to connect before using them
     const connectedBotSockets = await getBotSockets();
 

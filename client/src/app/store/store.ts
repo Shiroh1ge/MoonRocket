@@ -1,6 +1,6 @@
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { environment } from '../../environments/environment';
-import { playerReducer, PlayerState } from './player.reducer';
+import { playerReducer, PlayerState } from './reducers/player.reducer';
 
 export interface GlobalState {
     player: PlayerState;
