@@ -111,9 +111,10 @@ export class AppComponent implements OnInit {
                 this.playerActions.getPlayerSuccessDispatch(player);
             });
         this.socketService.on(SocketEvents.newBets)
-            .subscribe((data: { playerBets: PlayerBet[] }) => {
+            .subscribe(({ playerBets }: { playerBets: PlayerBet[] }) => {
                 this.resetLaunchData();
-                this.dataSource.data = data.playerBets;
+                this.playerBets = playerBets;
+                this.dataSource.data = playerBets;
             });
 
         this.socketService.on(SocketEvents.launchInitiated)
@@ -145,13 +146,13 @@ export class AppComponent implements OnInit {
                             }
 
                             this.playerBets.forEach(playerBet => {
-                                if (playerBet.altitude >= this.resultAltitude) {
+                                if (this.resultAltitude >= playerBet.altitude) {
+                                    console.log(playerBet);
+
                                     this.movementPlayerIdMap[playerBet.playerId] = movementPlayerIdMap[playerBet.playerId];
+                                    console.log('map', this.movementPlayerIdMap);
                                 }
                             });
-
-                            console.log('res', this.resultAltitude);
-
                         },
                         () => {
                         },
