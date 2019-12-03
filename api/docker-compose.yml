@@ -16,13 +16,15 @@ services:
 
   db:
     build: ./db
+    container_name: my_mysql
+
     environment:
-      MYSQL_USER: root
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: test
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: asdf1234
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: asdf1234
     ports:
-      - 3307
+      - 3306
 
 networks:
   server:

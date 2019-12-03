@@ -19,18 +19,6 @@
             </div>
         </div>
         <div class="progress-wrapper">
-            <div class="launch-countdown">
-                <h3>
-                    New launch in: <span>{{newLaunchCountdownSeconds}}</span> seconds
-                </h3>
-            </div>
-            <div class="progress-container">
-                <div class="result-altitude-container">
-                    <span class="altitude" *ngIf="betAltitude !== 0">My Bet: {{betAltitude}}</span>
-                </div>
-                <app-progress-bar [value]="getAltitudeProgress(betAltitude)" [max]="100"></app-progress-bar>
-                <p>{{startingValue}} km</p>
-            </div>
             <div class="progress-container">
                 <div class="result-altitude-container">
                     <span class="result-altitude" *ngIf="launch">Result: {{launch.altitude}}</span>
@@ -117,16 +105,16 @@
                         </td>
                     </ng-container>
 
-                    <ng-container matColumnDef="isWinner">
+                    <ng-container matColumnDef="gain">
                         <th mat-header-cell mat-sort-header *matHeaderCellDef>
                             Result
                         </th>
 
                         <td mat-cell *matCellDef="let element">
                             <span [ngClass]="{
-                                'winner': element.isWinner,
-                                'loser': !element.isWinner
-                            }">{{ element.isWinner ? 'WINNER' : 'LOSER' }}</span>
+                                'winner': element.gain > 0,
+                                'loser': !element.gain < 0
+                            }">{{ element.gain }}</span>
 
                         </td>
                     </ng-container>

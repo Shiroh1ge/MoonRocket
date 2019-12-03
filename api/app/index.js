@@ -18,6 +18,7 @@ const connectDb = require('./src/models/index').connectDb;
 const io = require('socket.io')(server);
 require('./src/socket/launches')(io);
 require('./src/socket/players')(io);
+require('./src/socket/bots')(io);
 
 
 app.use(function (req, res, next) {

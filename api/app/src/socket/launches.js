@@ -25,6 +25,10 @@ const getValidatedBetAmount = (betAmount, playerBalance) => {
     }
 };
 
+const reInitLaunch = () => {
+    restart$.next();
+};
+
 module.exports = (io) => {
     io.on('connection', async (socket) => {
         socket.on(SocketEvents.bet, async (data) => {
@@ -43,12 +47,15 @@ module.exports = (io) => {
         });
     });
 
+
     const initLaunchCreation = async () => {
         let playerBets = [...playerBetsBuffer.values()];
         playerBetsBuffer.clear();
         stop$.next();
 
         try {
+            console.log('Creating new launch...');
+            // throw 'bako';
             const [launch, movements] = await launchesRepo.newLaunchFlow(playerBets);
 
             const movementPlayerIdMap = movements
@@ -58,57 +65,31 @@ module.exports = (io) => {
                     return result;
                 }, {});
 
-            playerBets = playerBets.map(playerBet => {
-                return {
-                    ...playerBet,
-                    isWinner: movementPlayerIdMap[playerBet.playerId] && movementPlayerIdMap[playerBet.playerId].gain > 0
-                };
-            });
+            io.to(SocketRooms.launches).emit(SocketEvents.newBets,
+                {
+                    playerBets
+                });
 
-            playerBets.forEach(playerBet => {
-                io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.newLaunch,
+            setTimeout(() => {
+                io.to(SocketRooms.launches).emit(SocketEvents.newLaunch,
                     {
-                        launch: {altitude: launch.altitude, id: launch.id},
-                        currentPlayerMovement: movementPlayerIdMap[playerBet.playerId],
-                        playerBets
+                        launch,
+                        movementPlayerIdMap
                     });
-            });
+                reInitLaunch();
 
-            return [launch, playerBets, movementPlayerIdMap];
+            }, 2000);
+
+            return launch;
 
         } catch (error) {
-            playerBets.forEach(playerBet => {
-                io.to(SocketRooms.user + playerBet.userId).emit(SocketEvents.error, errors.unsuccessfulLaunch);
-            });
+            io.to(SocketRooms.launches).emit(SocketEvents.error, errors.unsuccessfulLaunch);
             reInitLaunch();
             console.error('Error creating a launch: ', error);
             throw new Error(errors.unsuccessfulLaunch);
 
         }
 
-    };
-
-    const reInitLaunch = () => {
-        // Delay before starting the next launch countdown (show the animation here)
-        const nextLaunchDelay = 0;
-        // Countdown before starting the new launch (after animation ending)
-        const countdownSeconds = 5;
-        const timer$ = Rx.timer(nextLaunchDelay, 1000)
-            .pipe(
-                map(value => countdownSeconds - value),
-                take(countdownSeconds)
-            );
-
-        timer$.subscribe(val => {
-                console.log('countdown before next launch: ', val);
-                io.emit(SocketEvents.newLaunchCountdown, val);
-            },
-            {},
-            complete => {
-                console.log('Launch has completed, restarting...');
-                restart$.next();
-            }
-        );
     };
 
     const launchCreationInterval$ = Rx.interval(LAUNCH_CREATION_INTERVAL)
@@ -118,8 +99,6 @@ module.exports = (io) => {
         )
         .subscribe(async (value) => {
                 await initLaunchCreation();
-
-                reInitLaunch();
             }
         );
 };

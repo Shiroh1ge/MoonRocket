@@ -19,7 +19,7 @@ const getOrCreatePlayer = async (userId) => {
 
 module.exports = (io) => {
     io.on('connection', async (socket) => {
-        socket.emit(SocketEvents.connected, {id: socket.id});
+        socket.emit(SocketEvents.playerConnected, {id: socket.id});
 
         socket.on(SocketEvents.getPlayer, async (data) => {
             const player = await getOrCreatePlayer(data.userId);

@@ -28,7 +28,7 @@ export class SocketService {
         }
         this.socket = null;
         this.socket = io(environment.socketRoot);
-        this.socket.on('connected', () => {
+        this.socket.on(SocketEvents.connect, () => {
             console.log('Socket has connected');
 
             this.isConnected = true;

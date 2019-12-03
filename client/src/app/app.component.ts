@@ -16,6 +16,7 @@ interface PlayerBet {
     amount: number;
     playerId: number;
     userId: string;
+    gain?: number;
 }
 
 enum FlyAnimationState {
@@ -49,7 +50,7 @@ export class AppComponent implements OnInit {
     public betAltitude: number = 0;
     public newLaunchCountdownSeconds: number;
     public playerBets: PlayerBet[] = [];
-    public displayedColumns = ['userId', 'amount', 'altitude', 'isWinner'];
+    public displayedColumns = ['userId', 'amount', 'altitude', 'gain'];
     public launch: Launch | null;
     public flyAnimationState: FlyAnimationState = FlyAnimationState.DOWN;
     public FlyAnimationState = FlyAnimationState;
@@ -85,39 +86,50 @@ export class AppComponent implements OnInit {
         this.resetLaunchData();
         this.socketService.emit(SocketEvents.bet, data);
         this.betAltitude = data.altitude;
-        this.flyAnimationState = FlyAnimationState.UP;
-
     }
 
     ngOnInit() {
-        this.socketService.on(SocketEvents.connected)
+        this.socketService.on(SocketEvents.playerConnected)
             .subscribe((socketData: { id: string }) => {
-                this.socketService.emit(SocketEvents.getPlayer, { userId: socketData.id });
-
                 setTimeout(() => {
-                    this.socketService.joinRoom(SocketRooms.user + socketData.id);
-                }, 150);
+                    this.socketService.emit(SocketEvents.getPlayer, { userId: socketData.id });
+                    this.socketService.joinRoom(SocketRooms.launches);
+                });
+
             });
         this.socketService.on(SocketEvents.getPlayer)
             .subscribe((player: Player) => {
                 this.playerActions.getPlayerSuccessDispatch(player);
             });
-        this.socketService.on(SocketEvents.newLaunch)
-            .subscribe((data: { launch: Launch, playerBets: PlayerBet[], currentPlayerMovement: Movement }) => {
+        this.socketService.on(SocketEvents.newBets)
+            .subscribe((data: { playerBets: PlayerBet[] }) => {
                 this.playerBets = data.playerBets;
+
+            });
+
+        this.socketService.on(SocketEvents.newLaunch)
+            .subscribe((data: {
+                launch: Launch,
+                movementPlayerIdMap: { [playerId: string]: Movement }
+            }) => {
                 this.launch = data.launch;
-                this.playerActions.updatePlayerDispatch({
-                    balance: this.player.balance + data.currentPlayerMovement.gain
-                });
+
+                if (data.movementPlayerIdMap[this.player.id]) {
+                    this.playerActions.updatePlayerDispatch({
+                        balance: this.player.balance + data.movementPlayerIdMap[this.player.id].gain
+                    });
+                }
 
                 if (this.amount.value > this.player.balance) {
                     this.amount.patchValue(this.player.balance);
                 }
 
-                this.flyAnimationState = FlyAnimationState.EXPLODE;
-                setTimeout(() => {
-                    this.flyAnimationState = FlyAnimationState.DOWN;
-                }, 2000);
+                this.flyAnimationState = FlyAnimationState.UP;
+                // this.flyAnimationState = FlyAnimationState.EXPLODE;
+                // setTimeout(() => {
+                //     this.flyAnimationState = FlyAnimationState.DOWN;
+                // }, 2000);
+
             });
         this.socketService.on(SocketEvents.newLaunchCountdown)
             .subscribe((countDownSeconds) => {
