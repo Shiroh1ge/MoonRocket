@@ -10,20 +10,30 @@ const getPlayer = async (query, options = {}) => {
     try {
         return await Player.findOne({where: query, ...options});
     } catch (error) {
-      console.error('Error fetching player: ', error);
-      throw(error);
+        console.error('Error fetching player: ', error);
+        throw(error);
     }
 };
 
 /**
  * Creates a player if it does not exist.
  * @param {object} query
+ * @param {object} [data]
  * @returns {Promise.<*>}
  */
-const findOrCreatePlayer = async (query) => {
-    const [player, created] = await Player.findOrCreate({where: query});
+const getOrCreatePlayer = async (query, data) => {
+    try {
+        let player = await getPlayer(query);
 
-    return player;
+        if (!player) {
+            player = createPlayer({...query, ...data});
+        }
+
+        return player;
+    } catch (error) {
+        console.error('Error getting or creating player: ', error);
+        throw(error);
+    }
 };
 
 const updatePlayer = async (query, updateData) => {
@@ -91,7 +101,7 @@ const createPlayer = async (playerData) => {
 module.exports = {
     getPlayer,
     createPlayer,
-    findOrCreatePlayer,
+    getOrCreatePlayer,
     updatePlayer,
     updatePlayers,
     incrementPlayerField

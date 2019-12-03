@@ -4,7 +4,7 @@ const movementsRepo = require('../repository/movements.repo');
 const SocketEvents = require('../constants/socket-events').SocketEvents;
 const SocketRooms = require('../constants/socket-events').SocketRooms;
 const Rx = require('rxjs');
-const {map, timeInterval, switchMap, filter, skipWhile, takeUntil, repeatWhen, delay, take} = require('rxjs/operators');
+const {takeUntil, repeatWhen} = require('rxjs/operators');
 const errors = require('../helpers/errors');
 const LAUNCH_CREATION_INTERVAL = 10 * 1000;
 const stop$ = new Rx.Subject();
@@ -35,6 +35,10 @@ module.exports = (io) => {
             // currently we substitute userId with the socket id
             const player = await playersRepo.getPlayer({id: data.playerId});
             const amount = getValidatedBetAmount(data.amount, player.balance);
+
+            if (amount === 0) {
+                return;
+            }
 
             const playerBetData = {
                 playerId: player.id,
