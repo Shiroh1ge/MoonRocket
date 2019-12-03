@@ -13,7 +13,7 @@ const botUserIds = [
     'SdV3u0bakovaXMj3w2lAAAA'
 ];
 const DEFAULT_BOT_BALANCE = 1000;
-const BOT_BET_INTERVAL = 5 * 1000;
+const BOT_BET_INTERVAL = 8 * 1000;
 const stop$ = new Rx.Subject();
 const restart$ = new Rx.Subject();
 
@@ -49,6 +49,8 @@ module.exports = async (io) => {
         botUserIds.map(userId => playersRepo.getOrCreatePlayer({userId}, {balance: DEFAULT_BOT_BALANCE}))
     );
 
+    console.log('Got bot players...');
+
     // We wait for the sockets to connect before using them
     const connectedBotSockets = await getBotSockets();
 
@@ -58,6 +60,7 @@ module.exports = async (io) => {
             repeatWhen(() => restart$)
         )
         .subscribe(async (value) => {
+            console.log('Sending bot events...');
                 connectedBotSockets.forEach((socket, i) => {
                     socket.emit(SocketEvents.bet, {
                         playerId: botPlayers[i].id,
