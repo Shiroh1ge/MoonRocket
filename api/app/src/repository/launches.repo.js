@@ -120,7 +120,8 @@ const newLaunchFlow = async (playerBets) => {
                 altitude,
                 totalBetAmount,
                 totalLostAmount,
-                totalWonAmount
+                totalWonAmount,
+                participantsCount: playerBets.length
             };
 
             // step 1 - create a launch
